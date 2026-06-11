@@ -233,8 +233,10 @@ function vib(ms){if(navigator.vibrate)try{navigator.vibrate(ms)}catch(e){}}
 
 // ── SAVE / META ──
 function ldSave(){try{var s=JSON.parse(localStorage.getItem('cityrun_save')||'null');if(s&&s.own)return s}catch(e){}
-  return {w:0,best:parseInt(localStorage.getItem('cityrun_best')||'0',10)||0,own:[0],cur:0,streak:0,lastDay:'',daily:null}}
+  return {w:5000,g5:1,best:parseInt(localStorage.getItem('cityrun_best')||'0',10)||0,own:[0],cur:0,streak:0,lastDay:'',daily:null}}
 var SV=ldSave();
+// one-time top-up for saves created before the 5000-coin default
+if(!SV.g5){SV.g5=1;if(SV.w<5000)SV.w=5000;}
 function svSave(){try{localStorage.setItem('cityrun_save',JSON.stringify(SV))}catch(e){}}
 function today(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 
