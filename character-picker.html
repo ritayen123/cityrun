@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CITY RUN — 選擇角色</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;background:linear-gradient(180deg,#1a0533 0%,#2a1a4e 40%,#1a1a2e 100%);
+  font-family:'Fredoka',sans-serif;color:#fff}
+h1{text-align:center;padding:32px 0 6px;font-size:clamp(28px,5vw,42px);
+  text-shadow:0 2px 0 #E8584F,0 4px 12px rgba(0,0,0,.4);letter-spacing:3px}
+.sub{text-align:center;color:rgba(255,255,255,.45);font-size:14px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:16px;padding:0 20px 110px;max-width:1100px;margin:0 auto}
+.card{background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.06);
+  border-radius:18px;overflow:hidden;cursor:pointer;
+  transition:transform .2s,border-color .2s,box-shadow .2s;text-align:center}
+.card:hover{transform:translateY(-4px);border-color:rgba(232,88,79,.4);
+  box-shadow:0 8px 24px rgba(232,88,79,.15)}
+.card.selected{border-color:#E8584F;
+  box-shadow:0 0 0 3px rgba(232,88,79,.3),0 8px 30px rgba(232,88,79,.2)}
+.card canvas{display:block;margin:10px auto 0;border-radius:12px;transition:transform .2s}
+.card:hover canvas{transform:scale(1.03)}
+.card-info{padding:10px 14px 14px}
+.card-info h3{font-size:16px;font-weight:700;margin-bottom:2px}
+.card-info p{font-size:12px;color:rgba(255,255,255,.4);line-height:1.3}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;margin-top:4px;font-weight:600}
+.bar{position:fixed;bottom:0;left:0;width:100%;
+  background:rgba(26,26,46,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-top:1px solid rgba(255,255,255,.08);padding:16px 24px;
+  display:none;align-items:center;justify-content:center;gap:16px;z-index:10}
+.bar.on{display:flex}
+.bar span{font-size:16px;font-weight:600}
+.cbtn{font-family:'Fredoka',sans-serif;font-size:17px;font-weight:700;
+  border:none;border-radius:14px;padding:12px 36px;cursor:pointer;
+  background:linear-gradient(135deg,#E8584F,#F0976E);color:#fff;
+  box-shadow:0 4px 16px rgba(232,88,79,.4);transition:transform .12s}
+.cbtn:active{transform:scale(.95)}
+</style>
+</head>
+<body>
+<h1>選擇你的角色</h1>
+<p class="sub">點選喜歡的角色，確認後進入遊戲</p>
+<div class="grid" id="grid"></div>
+<div class="bar" id="bar">
+  <span id="sel-name">—</span>
+  <button class="cbtn" id="confirm">確認選擇</button>
+</div>
+<script>
+/* ═══════════════════════════════════════
+   Hand-drawn rendering engine
+   Seeded RNG + jittery bezier curves
+   ═══════════════════════════════════════ */
+var CW=150,CH=180,P2=Math.PI*2,PI=Math.PI;
+var DPR=Math.min(window.devicePixelRatio||1,2);
+var _s=1;
+function sd(n){_s=n;}
+function rng(){_s=(_s*1664525+1013904223)&0x7FFFFFFF;return _s/0x7FFFFFFF;}
+function j(n){return(rng()-0.5)*(n!==undefined?n:2);}
+var BK=0.5522;
+var INK='#2A1A0E'; // warm dark brown for outlines
+
+function sty(c,f,s,w){
+  c.lineCap='round';c.lineJoin='round';
+  if(f)c.fillStyle=f;
+  c.strokeStyle=s||INK;c.lineWidth=w||2.8;
+}
+
+/* Hand-drawn circle */
+function hC(c,cx,cy,r,f,s,w){
+  sty(c,f,s,w);
+  var sx=cx+j(),sy=cy-r+j();
+  c.beginPath();c.moveTo(sx,sy);
+  c.bezierCurveTo(cx+r*BK+j(2),cy-r+j(2),cx+r+j(2),cy-r*BK+j(2),cx+r+j(),cy+j());
+  c.bezierCurveTo(cx+r+j(2),cy+r*BK+j(2),cx+r*BK+j(2),cy+r+j(2),cx+j(),cy+r+j());
+  c.bezierCurveTo(cx-r*BK+j(2),cy+r+j(2),cx-r+j(2),cy+r*BK+j(2),cx-r+j(),cy+j());
+  c.bezierCurveTo(cx-r+j(2),cy-r*BK+j(2),cx-r*BK+j(2),cy-r+j(2),sx,sy);
+  c.closePath();if(f)c.fill();c.stroke();
+}
+
+/* Hand-drawn ellipse */
+function hE(c,cx,cy,rx,ry,rot,f,s,w){
+  sty(c,f,s,w);
+  c.save();if(rot){c.translate(cx,cy);c.rotate(rot);cx=0;cy=0;}
+  var sx=cx+j(),sy=cy-ry+j();
+  c.beginPath();c.moveTo(sx,sy);
+  c.bezierCurveTo(cx+rx*BK+j(2),cy-ry+j(2),cx+rx+j(2),cy-ry*BK+j(2),cx+rx+j(),cy+j());
+  c.bezierCurveTo(cx+rx+j(2),cy+ry*BK+j(2),cx+rx*BK+j(2),cy+ry+j(2),cx+j(),cy+ry+j());
+  c.bezierCurveTo(cx-rx*BK+j(2),cy+ry+j(2),cx-rx+j(2),cy+ry*BK+j(2),cx-rx+j(),cy+j());
+  c.bezierCurveTo(cx-rx+j(2),cy-ry*BK+j(2),cx-rx*BK+j(2),cy-ry+j(2),sx,sy);
+  c.closePath();if(f)c.fill();c.stroke();c.restore();
+}
+
+/* Hand-drawn rounded rect */
+function hR(c,x,y,w,h,rd,f,s,lw){
+  sty(c,f,s,lw);var r=rd||6;
+  c.beginPath();
+  c.moveTo(x+r+j(),y+j());
+  c.lineTo(x+w-r+j(),y+j());c.quadraticCurveTo(x+w+j(),y+j(),x+w+j(),y+r+j());
+  c.lineTo(x+w+j(),y+h-r+j());c.quadraticCurveTo(x+w+j(),y+h+j(),x+w-r+j(),y+h+j());
+  c.lineTo(x+r+j(),y+h+j());c.quadraticCurveTo(x+j(),y+h+j(),x+j(),y+h-r+j());
+  c.lineTo(x+j(),y+r+j());c.quadraticCurveTo(x+j(),y+j(),x+r+j(),y+j());
+  c.closePath();if(f)c.fill();c.stroke();
+}
+
+/* Hand-drawn line */
+function hL(c,x1,y1,x2,y2,s,w){
+  sty(c,null,s,w);
+  c.beginPath();c.moveTo(x1+j(),y1+j());
+  var mx=(x1+x2)/2+j(3),my=(y1+y2)/2+j(3);
+  c.quadraticCurveTo(mx,my,x2+j(),y2+j());c.stroke();
+}
+
+/* Hand-drawn triangle */
+function hTri(c,pts,f,s,w){
+  sty(c,f,s,w);c.beginPath();
+  c.moveTo(pts[0]+j(),pts[1]+j());
+  for(var i=2;i<pts.length;i+=2){
+    var px=(pts[i-2]+pts[i])/2+j(3),py=(pts[i-1]+pts[i+1])/2+j(3);
+    c.quadraticCurveTo(px,py,pts[i]+j(),pts[i+1]+j());
+  }c.closePath();if(f)c.fill();c.stroke();
+}
+
+/* Hand-drawn free path (fill only, no stroke unless specified) */
+function hPath(c,pts,f,doStroke,s,w){
+  sty(c,f,s,w);c.beginPath();
+  c.moveTo(pts[0]+j(),pts[1]+j());
+  for(var i=2;i<pts.length;i+=2){
+    c.lineTo(pts[i]+j(),pts[i+1]+j());
+  }c.closePath();if(f)c.fill();if(doStroke)c.stroke();
+}
+
+/* Adventure Time eyes — big white ovals with pupils + highlight */
+function atEyes(c,lx,ly,rx,ry,r,pr){
+  pr=pr||(r*0.42);
+  hC(c,lx,ly,r,'#FFF');hC(c,rx,ry,r,'#FFF');
+  sty(c,'#111');
+  c.beginPath();c.arc(lx+0.5,ly+1,pr,0,P2);c.fill();
+  c.beginPath();c.arc(rx+0.5,ry+1,pr,0,P2);c.fill();
+  sty(c,'#FFF');
+  c.beginPath();c.arc(lx-1.5,ly-2,1.8,0,P2);c.fill();
+  c.beginPath();c.arc(rx-1.5,ry-2,1.8,0,P2);c.fill();
+}
+
+/* Open mouth smile */
+function atMouth(c,x,y,w){
+  sty(c,'#7B1818');
+  c.beginPath();c.arc(x,y,w,0.12,PI-0.12);c.closePath();c.fill();c.stroke();
+  c.fillStyle='#FFF';c.fillRect(x-w*0.45,y,w*0.9,w*0.32);
+  sty(c,null,INK,1.5);c.beginPath();c.moveTo(x,y);c.lineTo(x,y+w*0.32);c.stroke();
+}
+
+/* Paper texture background */
+function paperBg(c){
+  c.fillStyle='#FFF9F0';c.fillRect(0,0,CW,CH);
+  c.globalAlpha=0.025;
+  for(var i=0;i<300;i++){
+    c.fillStyle=rng()>0.5?'#000':'#C8B090';
+    c.fillRect(rng()*CW,rng()*CH,rng()*2,rng()*2);
+  }
+  c.globalAlpha=1;
+}
+
+/* Star shape */
+function hStar(c,x,y,ro,ri,n,f,s,w){
+  sty(c,f,s,w);c.beginPath();
+  for(var i=0;i<n*2;i++){
+    var a=i*PI/n-PI/2,r2=i%2===0?ro:ri;
+    var px=x+Math.cos(a)*r2+j(),py=y+Math.sin(a)*r2+j();
+    if(i===0)c.moveTo(px,py);else c.lineTo(px,py);
+  }c.closePath();if(f)c.fill();if(s!==false)c.stroke();
+}
+
+/* ═══════════════════════════════════════
+   10 Characters — Adventure Time Style
+   ═══════════════════════════════════════ */
+
+function drawRunner(c){
+  sd(100);var cx=75;
+  paperBg(c);
+  // Legs
+  hR(c,48,132,20,28,6,'#2255CC');hR(c,82,132,20,28,6,'#2255CC');
+  // Shoes
+  hE(c,58,163,15,9,0,'#FFF');hE(c,92,163,15,9,0,'#FFF');
+  hL(c,46,163,70,163,'#E8584F',2);hL(c,80,163,104,163,'#E8584F',2);
+  // Body
+  hR(c,38,78,74,56,12,'#E8584F');
+  hL(c,75,82,75,132,INK,2);
+  // Arms
+  hE(c,30,98,12,20,-0.15,'#E8584F');hE(c,120,98,12,20,0.15,'#E8584F');
+  hC(c,25,115,8,'#FFDCB5');hC(c,125,115,8,'#FFDCB5');
+  // Head
+  hC(c,cx,48,34,'#FFDCB5');
+  // Hair
+  sty(c,'#5B3020');c.beginPath();
+  c.moveTo(42+j(),44+j());c.lineTo(44+j(),24+j());c.lineTo(56+j(),32+j());
+  c.lineTo(60+j(),12+j());c.lineTo(70+j(),28+j());c.lineTo(75+j(),8+j());
+  c.lineTo(80+j(),28+j());c.lineTo(90+j(),12+j());c.lineTo(94+j(),32+j());
+  c.lineTo(106+j(),24+j());c.lineTo(108+j(),44+j());
+  c.arc(cx,48,34,0,PI,true);c.closePath();c.fill();c.stroke();
+  // Face
+  atEyes(c,62,46,88,46,9);
+  atMouth(c,cx,62,12);
+  // Blush
+  c.fillStyle='rgba(255,150,130,0.2)';c.beginPath();c.arc(50,58,6,0,P2);c.fill();
+  c.beginPath();c.arc(100,58,6,0,P2);c.fill();
+}
+
+function drawNinja(c){
+  sd(200);var cx=75;
+  paperBg(c);
+  hR(c,50,134,18,28,5,'#2A2040');hR(c,82,134,18,28,5,'#2A2040');
+  hR(c,46,156,26,12,4,'#1A1030');hR(c,78,156,26,12,4,'#1A1030');
+  hR(c,40,80,70,56,10,'#2A2040');
+  hR(c,42,118,66,10,3,'#CC3333');
+  hE(c,32,98,11,20,-0.2,'#2A2040');hE(c,118,98,11,20,0.2,'#2A2040');
+  hC(c,26,115,8,'#3A3050');hC(c,124,115,8,'#3A3050');
+  // Shuriken
+  hStar(c,124,115,9,3,4,'#AAAAAA',INK,1.5);
+  // Head
+  hC(c,cx,48,32,'#2A2040');
+  // Headband
+  hR(c,43,38,64,10,3,'#CC3333');
+  // Tails
+  sty(c,'#CC3333');c.beginPath();
+  c.moveTo(107+j(),40+j());c.quadraticCurveTo(126+j(),36+j(),133+j(),27+j());
+  c.quadraticCurveTo(130+j(),34+j(),107+j(),48+j());c.closePath();c.fill();c.stroke();
+  sty(c,'#CC3333');c.beginPath();
+  c.moveTo(107+j(),43+j());c.quadraticCurveTo(131+j(),40+j(),139+j(),33+j());
+  c.quadraticCurveTo(135+j(),40+j(),107+j(),48+j());c.closePath();c.fill();c.stroke();
+  // Eyes (narrow slits)
+  hE(c,62,43,9,4,0,'#FFF');hE(c,88,43,9,4,0,'#FFF');
+  sty(c,'#111');c.beginPath();c.arc(63,43,3,0,P2);c.fill();
+  c.beginPath();c.arc(89,43,3,0,P2);c.fill();
+  sty(c,'#FF4444',false);
+  c.beginPath();c.arc(62,43,4,0,P2);c.fill();
+  c.globalAlpha=0.15;c.beginPath();c.arc(62,43,7,0,P2);c.fill();
+  c.beginPath();c.arc(88,43,7,0,P2);c.fill();c.globalAlpha=1;
+}
+
+function drawRobot(c){
+  sd(300);var cx=75;
+  paperBg(c);
+  // Antenna
+  hL(c,cx,18,cx,4,INK,2.5);
+  hC(c,cx,4,5,'#FFDD44');
+  // Legs
+  hR(c,50,134,18,28,4,'#778899');hR(c,82,134,18,28,4,'#778899');
+  hR(c,44,158,30,12,4,'#667788');hR(c,76,158,30,12,4,'#667788');
+  // Body
+  hR(c,38,78,74,58,8,'#8899AA');
+  hR(c,52,88,46,30,5,'#556677',INK,2);
+  // Lights
+  hC(c,64,100,4,'#44FFAA',INK,1.5);hC(c,cx,100,4,'#FF4444',INK,1.5);hC(c,86,100,4,'#44AAFF',INK,1.5);
+  // Arms
+  hR(c,20,86,16,32,5,'#8899AA');hR(c,114,86,16,32,5,'#8899AA');
+  hC(c,28,86,5,'#FFDD44',INK,2);hC(c,122,86,5,'#FFDD44',INK,2);
+  hC(c,28,122,7,'#667788');hC(c,122,122,7,'#667788');
+  // Head
+  hR(c,42,18,66,48,10,'#8899AA');
+  hR(c,50,25,50,34,6,'#112233',INK,2);
+  // Eyes (glowing rectangles)
+  c.fillStyle='#00DDFF';c.shadowColor='#00DDFF';c.shadowBlur=8;
+  c.fillRect(56,34,14,10);c.fillRect(80,34,14,10);c.shadowBlur=0;
+  // Mouth
+  hL(c,62,52,88,52,'#00DDFF',2);
+}
+
+function drawCat(c){
+  sd(400);var cx=75;
+  paperBg(c);
+  // Tail
+  sty(c,'#FF8833');c.beginPath();
+  c.moveTo(115+j(),125+j());c.quadraticCurveTo(140+j(),108+j(),135+j(),82+j());
+  c.quadraticCurveTo(132+j(),72+j(),125+j(),78+j());
+  c.quadraticCurveTo(128+j(),98+j(),110+j(),120+j());c.closePath();c.fill();c.stroke();
+  // Legs
+  hR(c,48,140,18,24,5,'#FF8833');hR(c,84,140,18,24,5,'#FF8833');
+  hE(c,57,165,12,7,0,'#FFD5AA');hE(c,93,165,12,7,0,'#FFD5AA');
+  // Body
+  hE(c,cx,115,38,30,0,'#FF8833');
+  sty(c,'#FFE4C4');c.beginPath();c.ellipse(cx,118,22,20,0,0,P2);c.fill();
+  // Arms
+  hE(c,30,110,10,16,-0.3,'#FF8833');hE(c,120,110,10,16,0.3,'#FF8833');
+  // Head
+  hC(c,cx,55,38,'#FF8833');
+  // Ears
+  hTri(c,[42,30,32,2,58,22],'#FF8833');hTri(c,[108,30,118,2,92,22],'#FF8833');
+  sty(c,'#FF88AA');c.beginPath();c.moveTo(44,28);c.lineTo(38,10);c.lineTo(55,24);c.closePath();c.fill();
+  c.beginPath();c.moveTo(106,28);c.lineTo(112,10);c.lineTo(95,24);c.closePath();c.fill();
+  // Forehead stripe
+  sty(c,'#DD6600',INK,1.5);c.beginPath();
+  c.moveTo(65+j(),28+j());c.lineTo(75+j(),22+j());c.lineTo(85+j(),28+j());
+  c.lineTo(75+j(),34+j());c.closePath();c.fill();c.stroke();
+  // Eyes (cat pupils)
+  hE(c,60,50,10,11,0,'#FFF');hE(c,90,50,10,11,0,'#FFF');
+  sty(c,'#111');c.beginPath();c.ellipse(61,52,3,8,0,0,P2);c.fill();
+  c.beginPath();c.ellipse(91,52,3,8,0,0,P2);c.fill();
+  sty(c,'#FFF');c.beginPath();c.arc(58,47,2,0,P2);c.fill();
+  c.beginPath();c.arc(88,47,2,0,P2);c.fill();
+  // Nose
+  sty(c,'#FF6688');c.beginPath();c.moveTo(cx,64);c.lineTo(cx-4,60);c.lineTo(cx+4,60);c.closePath();c.fill();
+  // Mouth (W)
+  hL(c,cx,64,cx-8,70,INK,2);hL(c,cx,64,cx+8,70,INK,2);
+  // Whiskers
+  hL(c,38,58,55,62,INK,1.5);hL(c,38,66,55,64,INK,1.5);
+  hL(c,112,58,95,62,INK,1.5);hL(c,112,66,95,64,INK,1.5);
+}
+
+function drawAstro(c){
+  sd(500);var cx=75;
+  paperBg(c);
+  hR(c,50,136,18,24,5,'#DDD');hR(c,82,136,18,24,5,'#DDD');
+  hR(c,44,155,30,14,5,'#FF7700');hR(c,76,155,30,14,5,'#FF7700');
+  hR(c,38,78,74,60,12,'#EEE');
+  hR(c,52,88,46,28,6,'#CCC',INK,2);
+  hC(c,65,100,3,'#44FF88',false,1);hC(c,cx,100,3,'#FF4444',false,1);hC(c,85,100,3,'#4488FF',false,1);
+  hR(c,40,122,70,10,3,'#FF7700',INK,2);
+  hE(c,30,100,12,22,-0.15,'#EEE');hE(c,120,100,12,22,0.15,'#EEE');
+  hC(c,24,118,9,'#FF7700');hC(c,126,118,9,'#FF7700');
+  hR(c,98,82,22,40,6,'#CCC');
+  // Helmet
+  hC(c,cx,45,36,'#DDD');
+  hC(c,cx,45,28,'rgba(120,200,255,0.25)',INK,2);
+  // Visor reflection
+  c.fillStyle='rgba(255,255,255,0.22)';c.save();c.translate(64,35);c.rotate(-0.3);
+  c.beginPath();c.ellipse(0,0,7,14,0,0,P2);c.fill();c.restore();
+  // Face inside
+  sty(c,'#FFDCB5');c.beginPath();c.arc(cx,48,16,0,P2);c.fill();
+  sty(c,'#111');c.beginPath();c.arc(70,46,3,0,P2);c.fill();
+  c.beginPath();c.arc(80,46,3,0,P2);c.fill();
+  sty(c,'#FFF');c.beginPath();c.arc(69,45,1.2,0,P2);c.fill();
+  c.beginPath();c.arc(79,45,1.2,0,P2);c.fill();
+  sty(c,null,INK,2);c.beginPath();c.arc(cx,52,5,0.2,PI-0.2);c.stroke();
+  // Helmet rim
+  hR(c,40,70,70,10,3,'#CCC');
+}
+
+function drawGhost(c){
+  sd(600);var cx=75;
+  paperBg(c);
+  // Ghost body
+  sty(c,'#E0EEFF');c.beginPath();
+  c.arc(cx,65,42,PI,0);c.lineTo(cx+42+j(),148+j());
+  c.quadraticCurveTo(cx+30+j(),138+j(),cx+20+j(),152+j());
+  c.quadraticCurveTo(cx+10+j(),166+j(),cx+j(),148+j());
+  c.quadraticCurveTo(cx-10+j(),166+j(),cx-20+j(),152+j());
+  c.quadraticCurveTo(cx-30+j(),138+j(),cx-42+j(),148+j());
+  c.lineTo(cx-42,65);c.closePath();c.fill();c.stroke();
+  // Blush
+  c.fillStyle='rgba(255,150,150,0.35)';c.beginPath();c.arc(50,92,8,0,P2);c.fill();
+  c.beginPath();c.arc(100,92,8,0,P2);c.fill();
+  // Stubs
+  hE(c,28,90,10,8,-0.3,'#E0EEFF');hE(c,122,90,10,8,0.3,'#E0EEFF');
+  // Eyes
+  atEyes(c,60,78,90,78,13,6);
+  // Mouth
+  hC(c,cx,102,6,'#AA6688',INK,2);
+}
+
+function drawSkater(c){
+  sd(700);var cx=75;
+  paperBg(c);
+  // Legs (baggy pants)
+  hR(c,44,130,24,32,6,'#2A2A4A');hR(c,82,130,24,32,6,'#2A2A4A');
+  hE(c,56,165,17,10,0,'#E8584F');hE(c,94,165,17,10,0,'#E8584F');
+  sty(c,'#FFF');c.fillRect(42,160,28,5);c.fillRect(80,160,28,5);
+  // Tee
+  hR(c,34,76,82,58,10,'#F4D35E');
+  hStar(c,cx,105,10,4,5,'#E8584F',false);
+  // Arms
+  hE(c,26,98,10,20,-0.2,'#D4A88C');hE(c,124,98,10,20,0.2,'#D4A88C');
+  hC(c,22,116,7,'#D4A88C');hC(c,128,116,7,'#D4A88C');
+  // Head
+  hC(c,cx,46,32,'#D4A88C');
+  // Cap backwards
+  sty(c,'#44AA55');c.beginPath();c.arc(cx,40,30,PI+0.3,-0.3);c.closePath();c.fill();c.stroke();
+  sty(c,'#44AA55');c.beginPath();
+  c.moveTo(45+j(),42+j());c.lineTo(28+j(),48+j());c.lineTo(26+j(),40+j());c.lineTo(43+j(),34+j());
+  c.closePath();c.fill();c.stroke();
+  // Hair poking out
+  hL(c,92,28,106,24,'#3A2010',2.5);hL(c,96,32,112,30,'#3A2010',2.5);
+  // Cool half-lidded eyes
+  hE(c,62,46,8,6,0,'#FFF');hE(c,88,46,8,6,0,'#FFF');
+  sty(c,'#111');c.beginPath();c.arc(63,47,3.5,0,P2);c.fill();
+  c.beginPath();c.arc(89,47,3.5,0,P2);c.fill();
+  c.fillStyle='#D4A88C';c.fillRect(52,38,22,7);c.fillRect(78,38,22,7);
+  hL(c,54,44,72,44,INK,2);hL(c,78,44,98,44,INK,2);
+  // Smirk
+  sty(c,null,INK,2.5);c.beginPath();c.arc(cx+5,60,8,0.2,PI-0.6);c.stroke();
+}
+
+function drawPenguin(c){
+  sd(800);var cx=75;
+  paperBg(c);
+  // Feet
+  hE(c,56,165,16,8,0,'#FF8800');hE(c,94,165,16,8,0,'#FF8800');
+  // Body
+  hE(c,cx,100,40,58,0,'#1A1A2E');
+  hE(c,cx,108,26,40,0,'#F5F5F5',INK,2);
+  // Flippers
+  c.save();c.translate(30,95);c.rotate(-0.3);hE(c,0,0,10,22,0,'#1A1A2E');c.restore();
+  c.save();c.translate(120,95);c.rotate(0.3);hE(c,0,0,10,22,0,'#1A1A2E');c.restore();
+  // Eyes
+  atEyes(c,60,62,90,62,12,5);
+  // Beak
+  hTri(c,[cx,74,cx-8,84,cx+8,84],'#FF8800');
+  // Blush
+  c.fillStyle='rgba(255,150,150,0.2)';c.beginPath();c.arc(48,72,6,0,P2);c.fill();
+  c.beginPath();c.arc(102,72,6,0,P2);c.fill();
+}
+
+function drawWizard(c){
+  sd(900);var cx=75;
+  paperBg(c);
+  // Staff (behind)
+  hL(c,126,28,126,170,'#8B5E3C',3);
+  hC(c,126,26,8,'#44FF88');
+  c.fillStyle='rgba(150,255,200,0.2)';c.beginPath();c.arc(126,26,13,0,P2);c.fill();
+  // Robe bottom
+  sty(c,'#5A30A0');c.beginPath();
+  c.moveTo(35+j(),92+j());c.lineTo(28+j(),160+j());c.lineTo(122+j(),160+j());c.lineTo(115+j(),92+j());
+  c.closePath();c.fill();c.stroke();
+  // Shoes
+  sty(c,'#3A1870');c.beginPath();
+  c.moveTo(36+j(),158+j());c.lineTo(20+j(),155+j());c.quadraticCurveTo(16+j(),162+j(),34+j(),164+j());
+  c.closePath();c.fill();c.stroke();
+  sty(c,'#3A1870');c.beginPath();
+  c.moveTo(114+j(),158+j());c.lineTo(130+j(),155+j());c.quadraticCurveTo(134+j(),162+j(),116+j(),164+j());
+  c.closePath();c.fill();c.stroke();
+  // Body
+  hR(c,38,72,74,56,10,'#5A30A0');
+  hR(c,40,112,70,8,3,'#F4D35E',INK,2);
+  hC(c,cx,116,5,'#FFD700',INK,2);
+  // Arms
+  hE(c,30,95,12,18,-0.2,'#5A30A0');
+  c.save();c.translate(116,88);c.rotate(0.4);hE(c,0,0,11,18,0,'#5A30A0');c.restore();
+  hC(c,24,110,7,'#FFDCB5');hC(c,124,96,6,'#FFDCB5');
+  // Beard
+  sty(c,'#E8E8E8');c.beginPath();
+  c.moveTo(52+j(),62+j());c.lineTo(48+j(),92+j());
+  c.quadraticCurveTo(46+j(),118+j(),60+j(),122+j());
+  c.lineTo(75+j(),128+j());c.lineTo(90+j(),122+j());
+  c.quadraticCurveTo(104+j(),118+j(),102+j(),92+j());
+  c.lineTo(98+j(),62+j());c.closePath();c.fill();c.stroke();
+  // Head
+  hC(c,cx,50,26,'#FFDCB5');
+  // Hat brim
+  hR(c,38,36,74,10,3,'#4A2080');
+  // Hat cone
+  sty(c,'#4A2080');c.beginPath();
+  c.moveTo(cx+j(),0+j());c.lineTo(108+j(),38+j());c.lineTo(42+j(),38+j());c.closePath();c.fill();c.stroke();
+  // Star on hat
+  hStar(c,cx+3,18,7,3,5,'#F4D35E',false);
+  // Eyes
+  hC(c,64,50,6,'#FFF');hC(c,86,50,6,'#FFF');
+  sty(c,'#111');c.beginPath();c.arc(65,51,3,0,P2);c.fill();
+  c.beginPath();c.arc(87,51,3,0,P2);c.fill();
+}
+
+function drawBear(c){
+  sd(1000);var cx=75;
+  paperBg(c);
+  // Ears
+  hC(c,45,25,16,'#8B5E3C');hC(c,105,25,16,'#8B5E3C');
+  sty(c,'#CCA080');c.beginPath();c.arc(45,25,9,0,P2);c.fill();
+  c.beginPath();c.arc(105,25,9,0,P2);c.fill();
+  // Legs
+  hR(c,48,140,20,24,6,'#8B5E3C');hR(c,82,140,20,24,6,'#8B5E3C');
+  hE(c,58,165,14,8,0,'#CCA080');hE(c,92,165,14,8,0,'#CCA080');
+  // Paw pads
+  sty(c,'#8B5040');c.beginPath();c.arc(55,165,3,0,P2);c.fill();
+  c.beginPath();c.arc(61,165,3,0,P2);c.fill();
+  c.beginPath();c.arc(89,165,3,0,P2);c.fill();
+  c.beginPath();c.arc(95,165,3,0,P2);c.fill();
+  // Body
+  hE(c,cx,115,38,35,0,'#8B5E3C');
+  sty(c,'#CCA080');c.beginPath();c.ellipse(cx,118,24,22,0,0,P2);c.fill();
+  // Arms
+  hE(c,30,108,12,18,-0.25,'#8B5E3C');hE(c,120,108,12,18,0.25,'#8B5E3C');
+  hC(c,24,122,6,'#CCA080',INK,2);hC(c,126,122,6,'#CCA080',INK,2);
+  // Head
+  hC(c,cx,50,36,'#8B5E3C');
+  // Muzzle
+  hE(c,cx,60,16,12,0,'#CCA080',INK,2);
+  // Eyes
+  sty(c,'#111');c.beginPath();c.arc(60,46,4,0,P2);c.fill();
+  c.beginPath();c.arc(90,46,4,0,P2);c.fill();
+  sty(c,'#FFF');c.beginPath();c.arc(58,44,2,0,P2);c.fill();
+  c.beginPath();c.arc(88,44,2,0,P2);c.fill();
+  // Nose
+  hE(c,cx,56,6,4,0,'#333',INK,2);
+  sty(c,'rgba(255,255,255,0.3)');c.beginPath();c.arc(cx-2,55,2,0,P2);c.fill();
+  // Mouth
+  hL(c,cx,60,cx-6,66,INK,2);hL(c,cx,60,cx+6,66,INK,2);
+  // Blush
+  c.fillStyle='rgba(255,130,130,0.3)';c.beginPath();c.arc(48,58,7,0,P2);c.fill();
+  c.beginPath();c.arc(102,58,7,0,P2);c.fill();
+}
+
+/* ═══════════════════════════════════════
+   Character data + card generation
+   ═══════════════════════════════════════ */
+var CHARS=[
+  {id:'runner',name:'跑者',desc:'紅色帽T的活力跑者',tag:'經典',tagColor:'#E8584F',draw:drawRunner},
+  {id:'ninja',name:'忍者',desc:'暗影疾風，來去無蹤',tag:'酷帥',tagColor:'#5B8CDB',draw:drawNinja},
+  {id:'robot',name:'機器人',desc:'鋼鐵之軀，電子之心',tag:'科幻',tagColor:'#4ECDC4',draw:drawRobot},
+  {id:'cat',name:'橘貓',desc:'喵喵喵，跑得比你快',tag:'可愛',tagColor:'#F0976E',draw:drawCat},
+  {id:'astro',name:'太空人',desc:'跨越星際的冒險者',tag:'探險',tagColor:'#5B8CDB',draw:drawAstro},
+  {id:'ghost',name:'小幽靈',desc:'飄飄蕩蕩，其實很善良',tag:'奇幻',tagColor:'#B088E8',draw:drawGhost},
+  {id:'skater',name:'滑板仔',desc:'街頭潮流，自由靈魂',tag:'街頭',tagColor:'#E8584F',draw:drawSkater},
+  {id:'penguin',name:'企鵝',desc:'南極來的短腿選手',tag:'可愛',tagColor:'#F0976E',draw:drawPenguin},
+  {id:'wizard',name:'小巫師',desc:'神秘的魔法師',tag:'奇幻',tagColor:'#B088E8',draw:drawWizard},
+  {id:'bear',name:'小熊',desc:'圓滾滾的棕色泰迪',tag:'萌系',tagColor:'#D4A373',draw:drawBear}
+];
+
+var selected=null,grid=document.getElementById('grid');
+CHARS.forEach(function(ch,idx){
+  var card=document.createElement('div');card.className='card';
+  var cvs=document.createElement('canvas');
+  cvs.width=CW*DPR;cvs.height=CH*DPR;
+  cvs.style.width=CW+'px';cvs.style.height=CH+'px';
+  var ctx=cvs.getContext('2d');ctx.scale(DPR,DPR);
+  ch.draw(ctx);
+  card.appendChild(cvs);
+  var info=document.createElement('div');info.className='card-info';
+  info.innerHTML='<h3>'+ch.name+'</h3><p>'+ch.desc+'</p>'+
+    '<div class="tag" style="background:'+ch.tagColor+'22;color:'+ch.tagColor+'">'+ch.tag+'</div>';
+  card.appendChild(info);grid.appendChild(card);
+  card.addEventListener('click',function(){
+    selected=idx;
+    document.querySelectorAll('.card').forEach(function(c2){c2.classList.remove('selected')});
+    card.classList.add('selected');
+    document.getElementById('sel-name').textContent='已選：'+ch.name;
+    document.getElementById('bar').classList.add('on');
+  });
+});
+
+document.getElementById('confirm').addEventListener('click',function(){
+  if(selected===null)return;
+  localStorage.setItem('cityrun_char',CHARS[selected].id);
+  var cvs=document.querySelectorAll('.card canvas')[selected];
+  localStorage.setItem('cityrun_char_img',cvs.toDataURL());
+  window.location.href='index.html';
+});
+</script>
+</body>
+</html>
