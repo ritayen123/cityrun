@@ -445,6 +445,22 @@ var mLampB=new THREE.MeshPhongMaterial({color:lin(0xFFD66B),emissive:lin(0xFFAA3
 
 var cmC={};function cM(c){if(!cmC[c])cmC[c]=new THREE.MeshPhongMaterial({color:lin(c),shininess:50});return cmC[c]}
 
+// ── READABILITY LANGUAGE ──
+// Obstacles = dark chocolate family + striped warning mat on the road
+var dgCv=document.createElement('canvas');dgCv.width=64;dgCv.height=64;
+var dgK=dgCv.getContext('2d');
+dgK.fillStyle='#E8493C';dgK.fillRect(0,0,64,64);
+dgK.fillStyle='#FFF6EC';
+for(var dgi=0;dgi<64;dgi+=16)dgK.fillRect(0,dgi,64,8);
+var dgTex=new THREE.CanvasTexture(dgCv);dgTex.encoding=THREE.sRGBEncoding;
+var mDanger=new THREE.MeshBasicMaterial({map:dgTex,transparent:true,opacity:.8});
+function dangerMat(r){var m=new THREE.Mesh(new THREE.CircleGeometry(r,12),mDanger);m.rotation.x=-HP;m.position.y=.025;return m}
+var DARKC=[0x6B3A22,0x52281A,0xA03028,0x7A4A2B];
+// Pickups = glow bubble + vertical light beam (visible from afar)
+var puBubC={},puBeamC={};
+function puBub(c){if(!puBubC[c])puBubC[c]=new THREE.MeshPhongMaterial({color:lin(c),transparent:true,opacity:.16,shininess:120,specular:0xFFFFFF,depthWrite:false});return puBubC[c]}
+function puBeam(c){if(!puBeamC[c])puBeamC[c]=new THREE.MeshBasicMaterial({color:lin(c),transparent:true,opacity:.1,side:THREE.DoubleSide,depthWrite:false});return puBeamC[c]}
+
 // ── CHARACTER — Penguin (Adventure Time style) ──
 var pl=new THREE.Group();
 var pLn=0,pJ=false,pS=false,pVY=0,pST=0,pAl=true,pRT=0,pDead=false,pDeadT=0;
@@ -913,48 +929,54 @@ function mkObs(type){
   if(type==='car'){
     if(Math.random()<.5){
       // Gift box stack with ribbon + bow
-      var b1=new THREE.Mesh(new THREE.BoxGeometry(1.6,.9,1.6),cM(rC(CANDY)));b1.position.y=.45;g.add(b1);
-      var rb1=new THREE.Mesh(new THREE.BoxGeometry(1.64,.92,.3),msnow);rb1.position.y=.45;g.add(rb1);
-      var rb2=new THREE.Mesh(new THREE.BoxGeometry(.3,.92,1.64),msnow);rb2.position.y=.45;g.add(rb2);
-      var b2=new THREE.Mesh(new THREE.BoxGeometry(.9,.6,.9),cM(rC(CANDY)));b2.position.set(.1,1.2,-.1);g.add(b2);
-      var bow=new THREE.Mesh(new THREE.TorusGeometry(.16,.06,5,8),cM(0xFF6F8E));
+      var b1=new THREE.Mesh(new THREE.BoxGeometry(1.6,.9,1.6),cM(0x7A4A2B));b1.position.y=.45;g.add(b1);
+      var rb1=new THREE.Mesh(new THREE.BoxGeometry(1.64,.92,.3),cM(0xE8493C));rb1.position.y=.45;g.add(rb1);
+      var rb2=new THREE.Mesh(new THREE.BoxGeometry(.3,.92,1.64),cM(0xE8493C));rb2.position.y=.45;g.add(rb2);
+      var b2=new THREE.Mesh(new THREE.BoxGeometry(.9,.6,.9),cM(0x5C3320));b2.position.set(.1,1.2,-.1);g.add(b2);
+      var bow=new THREE.Mesh(new THREE.TorusGeometry(.16,.06,5,8),cM(0xE8493C));
       bow.position.set(.1,1.55,-.1);bow.rotation.x=HP;g.add(bow);
+      g.add(dangerMat(1.7));
     }else{
-      // Gummy candy cluster
+      // Dark cocoa gummy cluster
       for(var ci=0;ci<rI(4,6);ci++){
         var ch=rF(.5,1.5),cr2=rF(.18,.4);
-        var crystal=new THREE.Mesh(new THREE.ConeGeometry(cr2,ch,6),cM(rC(CANDY)));
+        var crystal=new THREE.Mesh(new THREE.ConeGeometry(cr2,ch,6),cM(rC(DARKC)));
         crystal.position.set(rF(-.6,.6),ch/2,rF(-.7,.7));
         crystal.rotation.set(rF(-.15,.15),rF(0,P2),rF(-.1,.1));g.add(crystal);
       }
-      var sb=new THREE.Mesh(new THREE.SphereGeometry(.8,6,4,0,P2,0,Math.PI/2),msnow);
+      var sb=new THREE.Mesh(new THREE.SphereGeometry(.8,6,4,0,P2,0,Math.PI/2),cM(0x52281A));
       sb.position.y=0;g.add(sb);
+      g.add(dangerMat(1.6));
     }
     g.userData.cr=1.4;g.userData.sy=1.6;g.userData.gy=0;
   }else if(type==='barrier'){
-    // Pink-white striped candy barrier
-    var br=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.0,.3),cM(0xFF7FA8));br.position.y=.65;g.add(br);
-    for(var i=0;i<4;i++){var st2=new THREE.Mesh(new THREE.BoxGeometry(.3,1.0,.32),i%2===0?msnow:cM(0xFF7FA8));st2.position.set(-0.75+i*.5,.65,0);g.add(st2)}
-    [-0.8,.8].forEach(function(x){var lg=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.6,5),cM(0xE86A92));lg.position.set(x,.3,0);g.add(lg)});
+    // Red-white striped warning barrier
+    var br=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.0,.3),cM(0xE8493C));br.position.y=.65;g.add(br);
+    for(var i=0;i<4;i++){var st2=new THREE.Mesh(new THREE.BoxGeometry(.3,1.0,.32),i%2===0?msnow:cM(0xE8493C));st2.position.set(-0.75+i*.5,.65,0);g.add(st2)}
+    [-0.8,.8].forEach(function(x){var lg=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.6,5),cM(0x52281A));lg.position.set(x,.3,0);g.add(lg)});
+    g.add(dangerMat(1.3));
     g.userData.cr=1.0;g.userData.sy=1.3;g.userData.gy=0;
   }else if(type==='cone'){
     // Strawberry
-    var cn=new THREE.Mesh(new THREE.ConeGeometry(.3,.9,7),cM(0xFF6F8E));cn.position.y=.45;g.add(cn);
-    var leaf=new THREE.Mesh(new THREE.ConeGeometry(.2,.16,6),cM(0x7FBF6A));leaf.position.y=.92;g.add(leaf);
-    var bs=new THREE.Mesh(new THREE.SphereGeometry(.34,6,4,0,Math.PI*2,0,Math.PI/2),msnow);bs.position.y=0;g.add(bs);
+    var cn=new THREE.Mesh(new THREE.ConeGeometry(.3,.9,7),cM(0xA03028));cn.position.y=.45;g.add(cn);
+    var leaf=new THREE.Mesh(new THREE.ConeGeometry(.2,.16,6),cM(0x52281A));leaf.position.y=.92;g.add(leaf);
+    var bs=new THREE.Mesh(new THREE.SphereGeometry(.34,6,4,0,Math.PI*2,0,Math.PI/2),cM(0x6B3A22));bs.position.y=0;g.add(bs);
+    g.add(dangerMat(.8));
     g.userData.cr=0.4;g.userData.sy=1.1;g.userData.gy=0;
   }else if(type==='low'){
-    // Jelly block with cherry — jump over
-    var bl=new THREE.Mesh(new THREE.BoxGeometry(2.3,.9,1.2),mice);bl.position.y=.45;g.add(bl);
+    // Chocolate cake block with cherry — jump over
+    var bl=new THREE.Mesh(new THREE.BoxGeometry(2.3,.9,1.2),cM(0x6B4226));bl.position.y=.45;g.add(bl);
     var lsc=new THREE.Mesh(new THREE.BoxGeometry(2.34,.12,1.24),msnow);lsc.position.y=.95;g.add(lsc);
-    var cher=new THREE.Mesh(new THREE.SphereGeometry(.16,6,5),cM(0xFF6F8E));cher.position.set(0,1.12,0);g.add(cher);
+    var cher=new THREE.Mesh(new THREE.SphereGeometry(.16,6,5),cM(0xA03028));cher.position.set(0,1.12,0);g.add(cher);
+    g.add(dangerMat(1.5));
     g.userData.cr=1.1;g.userData.sy=1.1;g.userData.gy=0;
   }else if(type==='overhead'){
-    // Candy beam — slide under
-    var oh=new THREE.Mesh(new THREE.BoxGeometry(2.8,.8,1.0),cM(0xB79BEB));oh.position.y=1.55;g.add(oh);
-    var ws1=new THREE.Mesh(new THREE.BoxGeometry(2.84,.14,1.02),cM(0xFFE066));ws1.position.set(0,1.22,0);g.add(ws1);
-    for(var i=0;i<4;i++){var dp=new THREE.Mesh(new THREE.ConeGeometry(.09,rF(.3,.6),5),cM(rC(CANDY)));dp.position.set(-0.8+i*.55,1.05-rF(0,.08),0);dp.rotation.x=Math.PI;g.add(dp)}
-    [-1.3,1.3].forEach(function(x){var po=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,1.9,5),msnow);po.position.set(x,.95,0);g.add(po)});
+    // Chocolate beam with warning stripe — slide under (no floor mat: the lane itself is passable)
+    var oh=new THREE.Mesh(new THREE.BoxGeometry(2.8,.8,1.0),cM(0x5C3320));oh.position.y=1.55;g.add(oh);
+    var ws1=new THREE.Mesh(new THREE.BoxGeometry(2.84,.14,1.02),cM(0xE8493C));ws1.position.set(0,1.22,0);g.add(ws1);
+    var ws2=new THREE.Mesh(new THREE.BoxGeometry(2.84,.1,1.02),msnow);ws2.position.set(0,1.34,0);g.add(ws2);
+    for(var i=0;i<4;i++){var dp=new THREE.Mesh(new THREE.ConeGeometry(.09,rF(.3,.6),5),i%2?cM(0xE8493C):msnow);dp.position.set(-0.8+i*.55,1.05-rF(0,.08),0);dp.rotation.x=Math.PI;g.add(dp)}
+    [-1.3,1.3].forEach(function(x){var po=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,1.9,5),cM(0x52281A));po.position.set(x,.95,0);g.add(po)});
     g.userData.cr=1.2;g.userData.sy=3.5;g.userData.gy=1.1;
   }
   return g;
@@ -964,8 +986,8 @@ function spawnObs(seg,d){
   var cnt=Math.floor(2+d*4),used=[];
   // Don't spawn in turn zone (last TZ units)
   var maxZ=seg.tt?SL-TZ-2:SL-3;
-  // Safe zone after turn — give player reaction time
-  var minZ=seg.at?22:4;
+  // Safe zone after turn — scales with speed so reaction time stays constant
+  var minZ=seg.at?Math.min(45,22+spd*.32):4;
   // Minimum z-gap between obstacles that block different lanes (reaction time)
   var CROSS_GAP=8;
   for(var i=0;i<cnt;i++){
@@ -1075,10 +1097,12 @@ function mkPU(t){
     var mc2=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.14,12),
       new THREE.MeshPhongMaterial({color:0xFFD700,shininess:120,emissive:0xFFAA00,emissiveIntensity:.5}));
     mc2.rotation.x=Math.PI/2;g.add(mc2);
-    // Glow
+    // Glow + gold beam
     var gl=new THREE.Mesh(new THREE.SphereGeometry(1.2,8,8),
       new THREE.MeshBasicMaterial({color:0xFFDD44,transparent:true,opacity:.15}));
     g.add(gl);
+    var beamM=new THREE.Mesh(new THREE.CylinderGeometry(.6,.85,3.4,8,1,true),puBeam(0xFFD700));
+    beamM.position.y=.2;g.add(beamM);
     // Star shape on face
     var star=new THREE.Mesh(new THREE.CylinderGeometry(.25,.5,.16,5),
       new THREE.MeshBasicMaterial({color:0xFFFFCC}));
@@ -1088,8 +1112,11 @@ function mkPU(t){
     // Larger ring + outer glow
     var ring=new THREE.Mesh(new THREE.TorusGeometry(.55,.08,8,16),new THREE.MeshPhongMaterial({color:rc,emissive:rc,emissiveIntensity:.4}));
     ring.rotation.x=Math.PI/2;g.add(ring);
-    var puGlow=new THREE.Mesh(new THREE.SphereGeometry(.7,6,6),new THREE.MeshBasicMaterial({color:rc,transparent:true,opacity:.08}));
+    // glow bubble + light beam = "pickup" language
+    var puGlow=new THREE.Mesh(new THREE.SphereGeometry(.8,10,8),puBub(rc));
     g.add(puGlow);
+    var beam=new THREE.Mesh(new THREE.CylinderGeometry(.5,.72,3.4,8,1,true),puBeam(rc));
+    beam.position.y=.2;g.add(beam);
     if(t==='magnet'){
       var u1=new THREE.Mesh(new THREE.BoxGeometry(.15,.55,.15),new THREE.MeshPhongMaterial({color:0xFF4444}));u1.position.x=-.2;g.add(u1);
       var u2=new THREE.Mesh(new THREE.BoxGeometry(.15,.55,.15),new THREE.MeshPhongMaterial({color:0x4444FF}));u2.position.x=.2;g.add(u2);
@@ -1247,7 +1274,7 @@ function upSnow(dt,cx,cz){
 // ── GAME STATE ──
 var st='menu',sc2=0,cc=0,dst=0,spd=BS,best=SV.best||0,isNB=false,diff=0,skI=0,skD=0;
 var combo=0,comboT=0,maxCombo=0,scBonus=0,runPU=0,runNM=0,revived=false,nextMile=500,rvCost=100,rvTimer=null,lastEarn=0;
-var cdT=0,cdShown=99,dieT=0,lean=0,sq=1;
+var cdT=0,cdShown=99,dieT=0,lean=0,sq=1,turnSlow=0;
 var ZONES=[
   {n:'草莓糖區',lr:lin(0xFFC272),ls:lin(0xFF9BC0),lc:lin(0xF55F96)},
   {n:'薄荷雲區',lr:lin(0xBFE8D8),ls:lin(0x7FD4B8),lc:lin(0x3DAD8E)},
@@ -1427,7 +1454,7 @@ function start(){
   st='count';cdT=3.2;cdShown=99;$count.textContent='';
   sc2=0;cc=0;dst=0;spd=BS;isNB=false;diff=0;skI=0;skD=0;
   combo=0;comboT=0;maxCombo=0;scBonus=0;runPU=0;runNM=0;revived=false;nextMile=500;lastEarn=0;
-  lean=0;sq=1;
+  lean=0;sq=1;turnSlow=0;
   mr.color.copy(ZONES[0].lr);ms.color.copy(ZONES[0].ls);mc.color.copy(ZONES[0].lc);
 
   resetWorld();
@@ -1513,6 +1540,7 @@ function anim(){
     var effSpd=spd;
     if(bstOn) effSpd*=1.5;
     if(frzOn) effSpd*=0.6;
+    if(turnSlow>0){turnSlow-=dt;effSpd*=.72}
 
     // Lane change (always available — turns are automatic)
     if(a.l&&pLn>-1){pLn--;sSwoosh()}
@@ -1553,6 +1581,7 @@ function anim(){
         curLO=0;
         sTurn();
         camBoost=1.0; // boost camera catch-up speed
+        turnSlow=.9;  // brief slow-down out of the corner = reaction window
       }
       curS++;
       sProg-=seg.len;
