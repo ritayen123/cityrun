@@ -5,104 +5,104 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#7CC4F2">
+<meta name="theme-color" content="#4F86B0">
 <title>SUGAR RUN 糖果樂園</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#7CC4F2;font-family:'Fredoka',sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#4F86B0;font-family:'Fredoka',sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:none}
 canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%}
 #ui{position:fixed;inset:0;pointer-events:none;z-index:10}
-#vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 58%,rgba(150,90,160,.18) 100%)}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 58%,rgba(80,45,20,.24) 100%)}
 #dofT,#dofB{position:absolute;left:0;width:100%;pointer-events:none}
-#dofT{top:0;height:15%;background:linear-gradient(180deg,rgba(235,248,255,.4),rgba(235,248,255,.14) 55%,transparent)}
-#dofB{bottom:0;height:18%;background:linear-gradient(0deg,rgba(255,235,248,.42),rgba(255,235,248,.15) 55%,transparent)}
-#count{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);font-size:clamp(64px,18vw,120px);font-weight:700;color:#fff;text-shadow:0 4px 0 #F58FB6,0 10px 30px rgba(220,110,160,.5);pointer-events:none;letter-spacing:4px}
+#dofT{top:0;height:15%;background:linear-gradient(180deg,rgba(235,245,250,.38),rgba(235,245,250,.13) 55%,transparent)}
+#dofB{bottom:0;height:18%;background:linear-gradient(0deg,rgba(255,232,198,.45),rgba(255,232,198,.16) 55%,transparent)}
+#count{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);font-size:clamp(64px,18vw,120px);font-weight:700;color:#fff;text-shadow:0 4px 0 #E8714A,0 10px 30px rgba(170,80,35,.5);pointer-events:none;letter-spacing:4px}
 #count.zoom{animation:cz .5s ease-out}
 @keyframes cz{0%{transform:translate(-50%,-50%) scale(1.7);opacity:0}30%{opacity:1}100%{transform:translate(-50%,-50%) scale(1)}}
 #flash{position:absolute;inset:0;background:#fff;opacity:0}
-.sl{position:absolute;top:0;width:16%;height:100%;opacity:0;background:repeating-linear-gradient(180deg,transparent 0 26px,rgba(255,150,195,.45) 26px 33px);animation:slm .3s linear infinite;transition:opacity .4s}
+.sl{position:absolute;top:0;width:16%;height:100%;opacity:0;background:repeating-linear-gradient(180deg,transparent 0 26px,rgba(255,218,160,.5) 26px 33px);animation:slm .3s linear infinite;transition:opacity .4s}
 #speedL{left:0;-webkit-mask-image:linear-gradient(90deg,#000,transparent);mask-image:linear-gradient(90deg,#000,transparent)}
 #speedR{right:0;-webkit-mask-image:linear-gradient(270deg,#000,transparent);mask-image:linear-gradient(270deg,#000,transparent)}
 @keyframes slm{from{background-position-y:0}to{background-position-y:59px}}
 
-#wallet{position:fixed;top:12px;left:14px;z-index:20;background:rgba(255,255,255,.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(245,166,35,.45);color:#D88A12;font-weight:700;font-size:15px;padding:7px 15px;border-radius:20px;pointer-events:none;box-shadow:0 4px 14px rgba(150,90,160,.15)}
+#wallet{position:fixed;top:12px;left:14px;z-index:20;background:rgba(255,248,235,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(200,140,60,.5);color:#C07A1E;font-weight:700;font-size:15px;padding:7px 15px;border-radius:20px;pointer-events:none;box-shadow:0 4px 14px rgba(80,45,20,.2)}
 
-#menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer;background:linear-gradient(180deg,rgba(110,180,240,.25),transparent 24%,transparent 46%,rgba(255,238,248,.9));transition:opacity .35s;padding:5.5vh 16px 3vh}
+#menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer;background:linear-gradient(180deg,rgba(60,110,160,.3),transparent 24%,transparent 46%,rgba(255,241,218,.92));transition:opacity .35s;padding:5.5vh 16px 3vh}
 #menu.hide{opacity:0;pointer-events:none}
-#menu h1{font-size:clamp(42px,10vw,88px);font-weight:700;color:#fff;text-shadow:0 3px 0 #FFB1CE,0 6px 0 #F58FB6,0 14px 34px rgba(220,110,160,.45);letter-spacing:6px;animation:bob 2.5s ease-in-out infinite}
+#menu h1{font-size:clamp(42px,10vw,88px);font-weight:700;color:#FFF8EA;text-shadow:0 3px 0 #F0934D,0 6px 0 #D8713A,0 14px 34px rgba(150,80,30,.5);letter-spacing:6px;animation:bob 2.5s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.sub{font-size:clamp(11px,2.2vw,14px);color:rgba(255,255,255,.92);letter-spacing:5px;text-transform:uppercase;margin-top:2px;text-shadow:0 1px 6px rgba(120,80,150,.35)}
-#mbest{color:#FFF3B0;font-weight:700;font-size:clamp(12px,2.4vw,16px);min-height:18px;margin-top:6px;text-shadow:0 1px 4px rgba(180,110,40,.45)}
+.sub{font-size:clamp(11px,2.2vw,14px);color:rgba(255,250,240,.95);letter-spacing:5px;text-transform:uppercase;margin-top:2px;text-shadow:0 1px 6px rgba(90,55,25,.45)}
+#mbest{color:#FFE9A8;font-weight:700;font-size:clamp(12px,2.4vw,16px);min-height:18px;margin-top:6px;text-shadow:0 1px 4px rgba(120,70,25,.55)}
 .spacer{flex:1}
 #char-row{display:flex;align-items:center;gap:18px;margin-bottom:2px}
-.arr{pointer-events:auto;background:rgba(255,255,255,.85);border:1px solid #FFD7E6;color:#E06A98;font-size:24px;line-height:1;width:44px;height:44px;border-radius:50%;cursor:pointer;font-family:inherit;transition:background .15s,transform .1s;box-shadow:0 4px 12px rgba(224,106,152,.2)}
-.arr:active{transform:scale(.88);background:#FFEAF2}
+.arr{pointer-events:auto;background:rgba(255,250,240,.9);border:1px solid #E0C494;color:#B5763A;font-size:24px;line-height:1;width:44px;height:44px;border-radius:50%;cursor:pointer;font-family:inherit;transition:background .15s,transform .1s;box-shadow:0 4px 12px rgba(140,90,40,.25)}
+.arr:active{transform:scale(.88);background:#FFF0DC}
 #char-info{text-align:center;min-width:160px}
-#char-name{font-size:clamp(18px,4vw,24px);font-weight:700;color:#5A4060;text-shadow:0 1px 0 rgba(255,255,255,.8)}
-#char-tag{font-size:12px;color:#D2699A;margin-top:2px;min-height:15px}
+#char-name{font-size:clamp(18px,4vw,24px);font-weight:700;color:#5C4226;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+#char-tag{font-size:12px;color:#C0703C;margin-top:2px;min-height:15px}
 .dots{display:flex;gap:6px;justify-content:center;margin-top:8px}
-.dot{width:7px;height:7px;border-radius:50%;background:rgba(90,64,96,.2);transition:background .2s,transform .2s}
-.dot.on{background:#FF7FAE;transform:scale(1.3)}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(92,66,38,.22);transition:background .2s,transform .2s}
+.dot.on{background:#E8923C;transform:scale(1.3)}
 #buyBtn{margin-top:10px;display:none}
-.tap{font-size:clamp(15px,3.5vw,20px);color:#fff;font-weight:700;margin-top:14px;background:linear-gradient(135deg,#FF8FB5,#FFB661);padding:14px 54px;border-radius:30px;box-shadow:0 8px 24px rgba(255,127,174,.5),inset 0 1px 0 rgba(255,255,255,.6);letter-spacing:3px;animation:pulse 1.8s ease-in-out infinite;text-shadow:0 1px 3px rgba(200,90,130,.4)}
+.tap{font-size:clamp(15px,3.5vw,20px);color:#fff;font-weight:700;margin-top:14px;background:linear-gradient(135deg,#F0703C,#FFAE4D);padding:14px 54px;border-radius:30px;box-shadow:0 8px 24px rgba(232,85,60,.45),inset 0 1px 0 rgba(255,255,255,.55);letter-spacing:3px;animation:pulse 1.8s ease-in-out infinite;text-shadow:0 1px 3px rgba(170,70,35,.45)}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
-#missions{margin-top:14px;background:rgba(255,255,255,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,200,225,.7);border-radius:16px;padding:10px 16px 12px;width:min(330px,86vw);display:flex;flex-direction:column;gap:7px;box-shadow:0 8px 24px rgba(150,90,160,.12)}
-#missions h3{font-size:12px;color:#C490B2;letter-spacing:2px;font-weight:600}
-.mi{display:flex;align-items:center;gap:8px;font-size:12px;color:#5A4060}
+#missions{margin-top:14px;background:rgba(255,249,238,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(220,180,130,.6);border-radius:16px;padding:10px 16px 12px;width:min(330px,86vw);display:flex;flex-direction:column;gap:7px;box-shadow:0 8px 24px rgba(80,45,20,.15)}
+#missions h3{font-size:12px;color:#B08A5C;letter-spacing:2px;font-weight:600}
+.mi{display:flex;align-items:center;gap:8px;font-size:12px;color:#5C4226}
 .mi .tx{flex:1;text-align:left}
-.mi .bar{width:70px;height:6px;background:rgba(90,64,96,.12);border-radius:3px;overflow:hidden}
-.mi .fill{display:block;height:100%;background:linear-gradient(90deg,#FF9EC4,#FFB661);border-radius:3px;transition:width .4s}
+.mi .bar{width:70px;height:6px;background:rgba(92,66,38,.14);border-radius:3px;overflow:hidden}
+.mi .fill{display:block;height:100%;background:linear-gradient(90deg,#F0A04D,#FFD27A);border-radius:3px;transition:width .4s}
 .mi.done .fill{background:linear-gradient(90deg,#FFC93C,#FFD700)}
 .mi .rw{color:#E8920A;font-weight:700;min-width:42px;text-align:right}
-.mi.done .tx{text-decoration:line-through;color:rgba(90,64,96,.4)}
+.mi.done .tx{text-decoration:line-through;color:rgba(92,66,38,.4)}
 .keys{margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-.keys span{font-size:11px;color:rgba(90,64,96,.5);background:rgba(255,255,255,.55);padding:3px 10px;border-radius:6px}
+.keys span{font-size:11px;color:rgba(92,66,38,.55);background:rgba(255,250,240,.6);padding:3px 10px;border-radius:6px}
 
 #hud{position:absolute;top:0;left:0;width:100%;display:none;padding:12px 16px 0;justify-content:space-between;align-items:flex-start}
 #hud.on{display:flex}
-.hi{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 14px;border-radius:20px;color:#5A4060;font-size:clamp(14px,3vw,18px);font-weight:700;margin-bottom:4px;box-shadow:0 4px 12px rgba(150,90,160,.15)}
-.hi.sc{background:rgba(255,143,181,.92);color:#fff}.hi.co{background:rgba(255,222,120,.95);color:#8A5C00}.hi.di{background:rgba(79,180,232,.92);color:#fff}
+.hi{display:flex;align-items:center;gap:6px;background:rgba(255,249,238,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:5px 14px;border-radius:20px;color:#5C4226;font-size:clamp(14px,3vw,18px);font-weight:700;margin-bottom:4px;box-shadow:0 4px 12px rgba(80,45,20,.18)}
+.hi.sc{background:rgba(232,85,60,.92);color:#fff}.hi.co{background:rgba(255,222,120,.95);color:#8A5C00}.hi.di{background:rgba(79,134,176,.92);color:#fff}
 #pup{position:absolute;top:60px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
-.pb{background:rgba(255,255,255,.85);backdrop-filter:blur(6px);color:#5A4060;padding:3px 10px;border-radius:14px;font-size:13px;font-weight:700;border:2px solid #4488FF}
-#combo{position:absolute;top:17%;left:50%;transform:translateX(-50%);font-size:clamp(22px,5vw,34px);font-weight:700;color:#FF5F9E;text-shadow:0 0 16px rgba(255,255,255,.9),0 2px 0 rgba(200,60,120,.35);opacity:0;transition:opacity .2s,transform .12s;pointer-events:none}
+.pb{background:rgba(255,249,238,.88);backdrop-filter:blur(6px);color:#5C4226;padding:3px 10px;border-radius:14px;font-size:13px;font-weight:700;border:2px solid #4488FF}
+#combo{position:absolute;top:17%;left:50%;transform:translateX(-50%);font-size:clamp(22px,5vw,34px);font-weight:700;color:#F0703C;text-shadow:0 0 16px rgba(255,255,255,.9),0 2px 0 rgba(180,80,30,.35);opacity:0;transition:opacity .2s,transform .12s;pointer-events:none}
 #combo.on{opacity:1}
-#toast{position:absolute;top:27%;left:50%;transform:translate(-50%,8px);background:rgba(255,255,255,.9);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid #FFD7E6;color:#C75A8E;font-weight:700;font-size:clamp(14px,3vw,18px);padding:9px 24px;border-radius:24px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:25;box-shadow:0 8px 22px rgba(150,90,160,.2)}
+#toast{position:absolute;top:27%;left:50%;transform:translate(-50%,8px);background:rgba(255,250,240,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid #E0C494;color:#A8662E;font-weight:700;font-size:clamp(14px,3vw,18px);padding:9px 24px;border-radius:24px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:25;box-shadow:0 8px 22px rgba(80,45,20,.22)}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 #pop{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .pop{position:absolute;bottom:42%;font-size:clamp(16px,3.6vw,22px);font-weight:700;color:#E8920A;text-shadow:0 0 8px rgba(255,255,255,.95),0 2px 4px rgba(180,110,40,.3);animation:popUp .95s ease-out forwards;transform:translateX(-50%);white-space:nowrap}
 .pop.nm{color:#2E9BE0}
 @keyframes popUp{0%{opacity:0;transform:translate(-50%,12px) scale(.7)}15%{opacity:1;transform:translate(-50%,0) scale(1.1)}30%{transform:translate(-50%,-6px) scale(1)}100%{opacity:0;transform:translate(-50%,-64px) scale(.92)}}
 
-#go{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,240,250,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:auto;gap:12px}
+#go{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,243,225,.86);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:auto;gap:12px}
 #go.on{display:flex;animation:fi .5s ease-out}
 @keyframes fi{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-#go h2{font-size:clamp(38px,10vw,68px);font-weight:700;color:#FF6FA5;text-shadow:0 3px 0 #fff,0 8px 24px rgba(255,111,165,.4);letter-spacing:4px}
+#go h2{font-size:clamp(38px,10vw,68px);font-weight:700;color:#F0703C;text-shadow:0 3px 0 #fff,0 8px 24px rgba(232,85,60,.4);letter-spacing:4px}
 #nb{display:none;color:#E8920A;font-weight:700;font-size:clamp(14px,3vw,18px);animation:nbp .7s ease-in-out infinite;text-shadow:0 0 10px rgba(255,255,255,.9)}
 @keyframes nbp{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-.card{background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border:1px solid #FFE0EE;border-radius:20px;padding:20px 36px;display:flex;flex-direction:column;gap:10px;min-width:210px;box-shadow:0 12px 30px rgba(150,90,160,.15)}
-.rr{display:flex;justify-content:space-between;font-size:clamp(15px,3.5vw,19px);color:rgba(90,64,96,.6)}.rr .v{font-weight:700;color:#5A4060}.rr.best .v{color:#E8920A}
-#goWallet{color:#8A6A80;font-size:14px}
+.card{background:rgba(255,250,240,.9);backdrop-filter:blur(10px);border:1px solid #F0DCBA;border-radius:20px;padding:20px 36px;display:flex;flex-direction:column;gap:10px;min-width:210px;box-shadow:0 12px 30px rgba(80,45,20,.18)}
+.rr{display:flex;justify-content:space-between;font-size:clamp(15px,3.5vw,19px);color:rgba(92,66,38,.6)}.rr .v{font-weight:700;color:#5C4226}.rr.best .v{color:#E8920A}
+#goWallet{color:#8A6A48;font-size:14px}
 #goWallet b{color:#E8920A;font-weight:700}
 .br{display:flex;gap:12px;margin-top:10px}
 .btn{font-family:'Fredoka',sans-serif;font-size:clamp(15px,3.5vw,19px);font-weight:700;border:none;border-radius:14px;padding:13px 34px;cursor:pointer;transition:transform .12s;letter-spacing:1px;pointer-events:auto}
 .btn:active{transform:scale(.93)}
-.bp{background:linear-gradient(135deg,#FF8FB5,#FFB661);color:#fff;box-shadow:0 6px 20px rgba(255,127,174,.45);text-shadow:0 1px 3px rgba(200,90,130,.35)}
-.bs{background:rgba(255,255,255,.85);color:#B07A98;border:1px solid #FFD7E6}
+.bp{background:linear-gradient(135deg,#F0703C,#FFAE4D);color:#fff;box-shadow:0 6px 20px rgba(232,85,60,.45);text-shadow:0 1px 3px rgba(170,70,35,.4)}
+.bs{background:rgba(255,250,240,.9);color:#B5763A;border:1px solid #E0C494}
 
-#revive,#pause{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,245,252,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:auto;gap:18px}
+#revive,#pause{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,245,230,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:auto;gap:18px}
 #revive.on,#pause.on{display:flex;animation:fi .3s ease-out}
-#revive h3,#pause h3{color:#5A4060;font-size:clamp(22px,5.5vw,30px);letter-spacing:4px}
-#rv-ring{width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(#FF7FAE var(--p,100%),rgba(90,64,96,.15) 0)}
-#rv-ring b{width:76px;height:76px;border-radius:50%;background:#FFFDF8;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:#FF5F9E}
+#revive h3,#pause h3{color:#5C4226;font-size:clamp(22px,5.5vw,30px);letter-spacing:4px}
+#rv-ring{width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(#F0883C var(--p,100%),rgba(92,66,38,.15) 0)}
+#rv-ring b{width:76px;height:76px;border-radius:50%;background:#FFFBF2;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:#E8553C}
 
-#daily{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,252,248,.97);border:1px solid rgba(245,166,35,.45);border-radius:20px;padding:24px 38px;color:#5A4060;text-align:center;z-index:30;display:none;pointer-events:auto;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 18px 50px rgba(150,90,160,.3)}
+#daily{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,250,242,.97);border:1px solid rgba(200,140,60,.5);border-radius:20px;padding:24px 38px;color:#5C4226;text-align:center;z-index:30;display:none;pointer-events:auto;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 18px 50px rgba(80,45,20,.35)}
 #daily.on{display:block;animation:fi .35s}
-#daily .ttl{font-size:13px;letter-spacing:3px;color:#C490B2}
+#daily .ttl{font-size:13px;letter-spacing:3px;color:#B08A5C}
 #daily .big{font-size:34px;margin:8px 0 4px}
 #daily .rw{color:#E8920A;font-weight:700;font-size:21px;margin-top:4px}
 
-#sound-btn,#pause-btn{position:fixed;top:12px;z-index:20;background:rgba(255,255,255,.78);backdrop-filter:blur(6px);border:1px solid #FFD7E6;color:#C75A8E;font-size:17px;width:38px;height:38px;border-radius:50%;cursor:pointer;pointer-events:auto;box-shadow:0 4px 12px rgba(150,90,160,.15)}
+#sound-btn,#pause-btn{position:fixed;top:12px;z-index:20;background:rgba(255,250,240,.85);backdrop-filter:blur(6px);border:1px solid #E0C494;color:#B5763A;font-size:17px;width:38px;height:38px;border-radius:50%;cursor:pointer;pointer-events:auto;box-shadow:0 4px 12px rgba(80,45,20,.18)}
 #sound-btn{right:14px}
 #pause-btn{right:60px;display:none}
 #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#1a1a2e;z-index:999;color:#E8584F;font-size:14px;padding:20px;text-align:center}
@@ -136,7 +136,7 @@ canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%}
   <div id="wallet">💰 <span id="wv">0</span></div>
   <div id="menu">
     <h1>SUGAR RUN</h1>
-    <p class="sub">Candy Cloud Runner</p>
+    <p class="sub">Toy Harbor Runner</p>
     <div id="mbest"></div>
     <div class="spacer"></div>
     <div id="char-row">
@@ -209,18 +209,18 @@ var JF=14, GR=38, SD=0.6, LS=14;
 var BS=25, SI=2.2, MS=75, PT=6;
 var P2=Math.PI*2, HP=Math.PI/2;
 
-// ── PALETTE — Candy Cloud World (pastel dream) ──
-var FOG_COL=0xBCE2F8;
-var ROAD_COL=0xFFC272;
-var SIDE_COL=0xFF9BC0;
-var CURB_COL=0xF55F96;
-var LINE_COL=0xFFFFFF;
-var GND_COL=0x62C173;
+// ── PALETTE — Toy Harbor World (Overcooked-style warm wood) ──
+var FOG_COL=0xB8D8E8;
+var ROAD_COL=0xFFFFFF;   // road is plank-textured; this is the tint
+var SIDE_COL=0x9DBFA0;   // sage painted walkway
+var CURB_COL=0x8A5A30;   // dark wood
+var LINE_COL=0xFFF6E0;
+var GND_COL=0x3E78A8;    // sea
 var WARM1=0xFFC46B;
 var WARM2=0xFFA85C;
 var WARM3=0xE8854A;
-var CANDY=[0xFF6FA0,0xFF9838,0x9966E8,0x4DBD7E,0x3FA8E8,0xFFC93C];
-var CC=[0xFF6FA0,0xFF9838,0x9966E8,0x4DBD7E,0x3FA8E8,0xFFC93C,0xFF7A5C];
+var CANDY=[0xA8743E,0x6FA065,0xC9A878,0xE8553C,0x4F86B0,0xE8B23C];
+var CC=[0xA8743E,0x6FA065,0xC9A878,0xE8553C,0x4F86B0,0xE8B23C,0xFF7A5C];
 // sRGB design color → linear space (required because renderer outputEncoding is sRGB;
 // without this every color gets double-brightened = the washed-out look)
 function lin(h){return new THREE.Color(h).convertSRGBToLinear()}
@@ -319,11 +319,11 @@ function paintPano(){
   var K=c2.getContext('2d');
   var _s=42;function R(){_s=(_s*16807)%2147483647;return(_s&0x7FFFFFFF)/2147483647}
 
-  // bright candy sky
+  // warm harbor sky
   var gd=K.createLinearGradient(0,0,0,CH);
-  gd.addColorStop(0,'#2486D4');gd.addColorStop(.3,'#469FE6');
-  gd.addColorStop(.55,'#6FB6F0');gd.addColorStop(.72,'#A8D4F8');
-  gd.addColorStop(.84,'#FFE0B8');gd.addColorStop(1,'#FFC2DA');
+  gd.addColorStop(0,'#2E8CC8');gd.addColorStop(.3,'#54A4DC');
+  gd.addColorStop(.45,'#8CC2E8');gd.addColorStop(.5,'#D8ECF5');
+  gd.addColorStop(.52,'#3E78A8');gd.addColorStop(.75,'#356A98');gd.addColorStop(1,'#2E5E88');
   K.fillStyle=gd;K.fillRect(0,0,CW,CH);
 
   // sun + warm halo
@@ -343,46 +343,39 @@ function paintPano(){
     K.fillStyle='rgba(255,228,242,'+(a*.45)+')';
     K.beginPath();K.ellipse(cx,cy+s*.5,s*1.7,s*.4,0,0,P2);K.fill();
   }
-  for(var i=0;i<9;i++)puff(R()*CW,CH*(.1+R()*.32),28+R()*55,.8+R()*.2);
-  for(var i=0;i<14;i++)puff(R()*CW,CH*(.56+R()*.12),14+R()*22,.55);
+  for(var i=0;i<9;i++)puff(R()*CW,CH*(.1+R()*.28),28+R()*55,.8+R()*.2);
+  for(var i=0;i<12;i++)puff(R()*CW,CH*(.42+R()*.06),12+R()*18,.55);
 
-  // floating balloons
-  var bCols=['#FF9EC4','#FFC46B','#B79BEB','#7FD8AC','#7FC8F5','#FFE07A'];
-  for(var i=0;i<26;i++){
-    var bx=R()*CW,by=CH*(.1+R()*.5),br=3+R()*7;
-    K.fillStyle=bCols[Math.floor(R()*bCols.length)];
-    K.globalAlpha=.4+R()*.4;
-    K.beginPath();K.ellipse(bx,by,br,br*1.15,0,0,P2);K.fill();
-    K.globalAlpha=1;
-  }
-
-  // pastel rolling hills
+  // green headlands at the horizon
   function mP(px,c){var y=0;for(var i=0;i<c.length;i++)y+=Math.sin(px/CW*Math.PI*2*c[i][0]+c[i][1])*c[i][2];return Math.max(y,0)}
   function hills(baseY,col,c){
-    K.fillStyle=col;K.beginPath();K.moveTo(0,CH);
+    K.fillStyle=col;K.beginPath();K.moveTo(0,baseY+14);
     for(var px=0;px<=CW;px+=4)K.lineTo(px,baseY-mP(px,c));
-    K.lineTo(CW,CH);K.closePath();K.fill();
+    K.lineTo(CW,baseY+14);K.closePath();K.fill();
   }
-  hills(CH*.52,'#A678D8',[[2,.9,22],[4,2.6,15],[3,1.7,12]]);
-  hills(CH*.55,'#F080B0',[[3,1.1,20],[2,3.4,16],[5,.7,10]]);
-  hills(CH*.58,'#7FCB8F',[[2,2.2,14],[4,1.5,10],[3,4.1,7]]);
+  hills(CH*.51,'#7A9C6A',[[2,.9,18],[4,2.6,12],[3,1.7,9]]);
+  hills(CH*.52,'#5E8A55',[[3,1.1,14],[2,3.4,11],[5,.7,7]]);
 
-  // giant balloon flowers peeking over the horizon hills
-  var fCols2=['#FF8FB8','#FFB85C','#B79BEB','#FF7FA0','#FFE066','#7FC8F5'];
-  for(var i=0;i<20;i++){
-    var fx2=R()*CW,fy=CH*(.5+R()*.07),fr=5+R()*11;
-    var fc=fCols2[Math.floor(R()*fCols2.length)];
-    for(var pp=0;pp<5;pp++){var ang=pp/5*P2+R();
-      K.fillStyle=fc;K.beginPath();K.arc(fx2+Math.cos(ang)*fr,fy+Math.sin(ang)*fr*.8,fr*.62,0,P2);K.fill()}
-    K.fillStyle='#FFF6D8';K.beginPath();K.arc(fx2,fy,fr*.5,0,P2);K.fill();
+  // sea sparkle bands
+  K.fillStyle='rgba(255,255,255,.14)';
+  for(var i=0;i<60;i++){
+    var sx2=R()*CW,sy2=CH*(.54+R()*.4),sw2=8+R()*40;
+    K.fillRect(sx2,sy2,sw2,1.6);
+  }
+  // wave shading
+  K.fillStyle='rgba(20,60,100,.12)';
+  for(var i=0;i<24;i++){
+    K.beginPath();K.ellipse(R()*CW,CH*(.6+R()*.35),30+R()*80,4+R()*5,0,0,P2);K.fill();
   }
 
-  // cloud sea below the horizon
-  var sg=K.createLinearGradient(0,CH*.58,0,CH);
-  sg.addColorStop(0,'#BFE2F8');sg.addColorStop(.4,'#D8EFFB');sg.addColorStop(1,'#EAF7FF');
-  K.fillStyle=sg;K.fillRect(0,CH*.6,CW,CH*.4);
-  for(var i=0;i<30;i++)puff(R()*CW,CH*(.58+R()*.12),20+R()*45,.55+R()*.4);
-  for(var i=0;i<16;i++)puff(R()*CW,CH*(.75+R()*.2),35+R()*60,.5+R()*.35);
+  // toy sailboats on the sea
+  for(var i=0;i<8;i++){
+    var bx2=R()*CW,by2=CH*(.56+R()*.1),bs3=5+R()*9;
+    K.fillStyle='#8A5A30';
+    K.beginPath();K.moveTo(bx2-bs3,by2);K.lineTo(bx2+bs3,by2);K.lineTo(bx2+bs3*.6,by2+bs3*.5);K.lineTo(bx2-bs3*.6,by2+bs3*.5);K.closePath();K.fill();
+    K.fillStyle=R()>.5?'#FFF6E0':'#E8553C';
+    K.beginPath();K.moveTo(bx2,by2-bs3*1.8);K.lineTo(bx2,by2-bs3*.1);K.lineTo(bx2+bs3*.9,by2-bs3*.1);K.closePath();K.fill();
+  }
 
   // dreamy bokeh
   for(var i=0;i<16;i++){
@@ -406,24 +399,27 @@ sc.add(new THREE.AmbientLight(0xFFFFFF,.2));
 var dL=new THREE.DirectionalLight(0xFFF2DC,.85);
 dL.position.set(-6,18,8);sc.add(dL);
 
-// Ground — sea of clouds texture (the road floats in the sky)
+// Ground — toy sea water (the boardwalk runs over the harbor)
 var gndCv=document.createElement('canvas');gndCv.width=512;gndCv.height=512;
 var gK=gndCv.getContext('2d');
-gK.fillStyle='#C2E2F8';gK.fillRect(0,0,512,512);
+gK.fillStyle='#3E78A8';gK.fillRect(0,0,512,512);
 var _gs=77;function gR(){_gs=(_gs*16807)%2147483647;return(_gs&0x7FFFFFFF)/2147483647}
-// deeper blue shading pockets
-for(var gi=0;gi<25;gi++){
+// deeper pockets
+for(var gi=0;gi<22;gi++){
   var gx=gR()*512,gy=gR()*512,gr=25+gR()*60;
-  gK.fillStyle='rgba(125,170,225,'+(0.1+gR()*0.12)+')';
+  gK.fillStyle='rgba(25,70,110,'+(0.12+gR()*0.14)+')';
   gK.beginPath();gK.ellipse(gx,gy,gr,gr*(.5+gR()*.4),gR()*Math.PI,0,Math.PI*2);gK.fill();
 }
-// puffy white cloud tops
-for(var gi=0;gi<60;gi++){
-  var cx2=gR()*512,cy2=gR()*512,cs2=14+gR()*36;
-  gK.fillStyle='rgba(255,255,255,'+(0.45+gR()*0.5)+')';
-  for(var cp=0;cp<5;cp++){
-    gK.beginPath();gK.arc(cx2+(gR()-.5)*cs2*1.8,cy2+(gR()-.5)*cs2*.6,cs2*(.4+gR()*.4),0,P2);gK.fill();
-  }
+// wave crests
+gK.strokeStyle='rgba(200,235,250,.4)';gK.lineWidth=2;
+for(var gi=0;gi<46;gi++){
+  var wx=gR()*512,wy=gR()*512,ww=10+gR()*26;
+  gK.beginPath();gK.arc(wx,wy,ww,Math.PI*.15,Math.PI*.85);gK.stroke();
+}
+// sun sparkles
+for(var gi=0;gi<70;gi++){
+  gK.fillStyle='rgba(255,255,255,'+(0.25+gR()*0.4)+')';
+  gK.fillRect(gR()*512,gR()*512,3+gR()*7,1.6);
 }
 var gndTex=new THREE.CanvasTexture(gndCv);gndTex.encoding=THREE.sRGBEncoding;gndTex.wrapS=gndTex.wrapT=THREE.RepeatWrapping;gndTex.repeat.set(8,8);
 var gnd=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshPhongMaterial({map:gndTex,color:0xFFFFFF,shininess:6}));
@@ -431,19 +427,43 @@ gnd.rotation.x=-Math.PI/2;gnd.position.set(0,-.06,0);sc.add(gnd);
 
 window.addEventListener('resize',function(){W=innerWidth;H=innerHeight;cam.aspect=W/H;cam.updateProjectionMatrix();ren.setSize(W,H)});
 
-// ── MATERIALS — Candy World (all shared, no per-object materials = no GC churn) ──
-var mr=new THREE.MeshPhongMaterial({color:lin(ROAD_COL),shininess:18,specular:0x444444});
+// ── MATERIALS — Toy Harbor (all shared, no per-object materials = no GC churn) ──
+// Procedural honey-wood plank texture (the Overcooked signature)
+var pkCv=document.createElement('canvas');pkCv.width=256;pkCv.height=256;
+var pK=pkCv.getContext('2d');
+var _ps=13;function pR(){_ps=(_ps*16807)%2147483647;return(_ps&0x7FFFFFFF)/2147483647}
+var PLANK_SHADES=['#CE9A5E','#C28E52','#D6A468','#C89456'];
+var rowH=32;
+for(var pr2=0;pr2<8;pr2++){
+  pK.fillStyle=PLANK_SHADES[pr2%4];pK.fillRect(0,pr2*rowH,256,rowH);
+  // wood grain
+  pK.strokeStyle='rgba(120,70,30,.16)';pK.lineWidth=1;
+  for(var gl2=0;gl2<3;gl2++){
+    var gy=pr2*rowH+7+gl2*9;
+    pK.beginPath();pK.moveTo(0,gy+pR()*3);
+    pK.bezierCurveTo(64,gy+pR()*4-2,150,gy-pR()*4+2,256,gy+pR()*3-1);pK.stroke();
+  }
+  // plank seam + joint + nails
+  pK.fillStyle='rgba(90,50,20,.45)';
+  pK.fillRect(0,pr2*rowH,256,2);
+  pK.fillRect(Math.floor(pR()*240),pr2*rowH,2,rowH);
+  pK.fillStyle='rgba(80,45,20,.5)';
+  pK.beginPath();pK.arc(Math.floor(pR()*240)+8,pr2*rowH+rowH/2,1.6,0,P2);pK.fill();
+}
+var pkTex=new THREE.CanvasTexture(pkCv);pkTex.encoding=THREE.sRGBEncoding;
+pkTex.wrapS=pkTex.wrapT=THREE.RepeatWrapping;pkTex.repeat.set(2,10);
+var mr=new THREE.MeshPhongMaterial({map:pkTex,color:lin(ROAD_COL),shininess:14,specular:0x333333});
 var ms=new THREE.MeshPhongMaterial({color:lin(SIDE_COL),shininess:10});
 var mc=new THREE.MeshPhongMaterial({color:lin(CURB_COL),shininess:25});
 var ml=new THREE.MeshBasicMaterial({color:LINE_COL});
 var mco=new THREE.MeshPhongMaterial({color:lin(0xFFD700),shininess:90,emissive:lin(0xFFAA00),emissiveIntensity:.55});
 var mwh=new THREE.MeshPhongMaterial({color:0x1A2A3A});
 var mgl=new THREE.MeshPhongMaterial({color:0x55BBEE,transparent:true,opacity:.45,shininess:120,specular:0xFFFFFF});
-var mpole=new THREE.MeshPhongMaterial({color:lin(0x8FD8B8),shininess:35});
+var mpole=new THREE.MeshPhongMaterial({color:lin(0x8A5A30),shininess:20}); // wood post
 var mice=new THREE.MeshPhongMaterial({color:lin(0xFF9EC4),transparent:true,opacity:.8,shininess:90,specular:0x666666}); // jelly
 var msnow=new THREE.MeshPhongMaterial({color:lin(0xFFF8EC),shininess:12}); // cream
-var mLampA=new THREE.MeshPhongMaterial({color:lin(0xFF9EC4),emissive:lin(0xFF6FA0),emissiveIntensity:.35,shininess:60});
-var mLampB=new THREE.MeshPhongMaterial({color:lin(0xFFD66B),emissive:lin(0xFFAA33),emissiveIntensity:.35,shininess:60});
+var mLampA=new THREE.MeshPhongMaterial({color:lin(0xFFD27A),emissive:lin(0xFFA83C),emissiveIntensity:.4,shininess:60});
+var mLampB=new THREE.MeshPhongMaterial({color:lin(0xFFE8B0),emissive:lin(0xFFB84D),emissiveIntensity:.4,shininess:60});
 
 var cmC={};function cM(c){if(!cmC[c])cmC[c]=new THREE.MeshPhongMaterial({color:lin(c),shininess:50});return cmC[c]}
 
@@ -553,16 +573,22 @@ var ACC=[];
   ACC.forEach(function(a){a.visible=false;pl.add(a)});
 })();
 
-// ── MENU DECOR — lollipops + balloons framing the character ──
+// ── MENU DECOR — barrels, crates & toy tree framing the character ──
 var menuDecor=new THREE.Group();
 (function(){
-  [-1,1].forEach(function(s){
-    var lh=2.6+(s>0?.4:0);
-    var stick=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,lh,5),msnow);stick.position.set(s*2.5,lh/2,-1.8);menuDecor.add(stick);
-    var disc=new THREE.Mesh(new THREE.CylinderGeometry(.62,.62,.18,12),cM(s>0?0xFF6FA0:0x3FA8E8));disc.rotation.x=HP;disc.position.set(s*2.5,lh+.4,-1.8);menuDecor.add(disc);
+  // barrel stack right
+  [[2.5,0],[3.3,0],[2.9,1.15]].forEach(function(bp){
+    var body=new THREE.Mesh(new THREE.CylinderGeometry(.42,.48,1.1,8),cM(0xA8743E));
+    body.position.set(bp[0],bp[1]+.55,-1.8);menuDecor.add(body);
+    var band=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.09,8),cM(0x6B4226));
+    band.position.set(bp[0],bp[1]+.8,-1.8);menuDecor.add(band);
   });
-  var bal=new THREE.Mesh(new THREE.SphereGeometry(.5,8,7),cM(0xFFC93C));bal.scale.y=1.15;bal.position.set(1.8,3.6,-3);menuDecor.add(bal);
-  var bal2=new THREE.Mesh(new THREE.SphereGeometry(.38,8,7),cM(0x9966E8));bal2.scale.y=1.15;bal2.position.set(-2.2,3.1,-3.2);menuDecor.add(bal2);
+  // crates left
+  var c1=new THREE.Mesh(new THREE.BoxGeometry(1.1,1.1,1.1),cM(0xB5854C));c1.position.set(-2.6,.55,-1.6);c1.rotation.y=.3;menuDecor.add(c1);
+  var c2=new THREE.Mesh(new THREE.BoxGeometry(.8,.8,.8),cM(0xC9A878));c2.position.set(-2.4,1.5,-1.7);c2.rotation.y=-.2;menuDecor.add(c2);
+  // toy tree behind
+  var tk=new THREE.Mesh(new THREE.CylinderGeometry(.14,.2,1.4,5),cM(0x8A5A30));tk.position.set(-3.4,.7,-3.4);menuDecor.add(tk);
+  var lf=new THREE.Mesh(new THREE.SphereGeometry(1.1,8,7),cM(0x6FA065));lf.position.set(-3.4,2.1,-3.4);lf.scale.y=.9;menuDecor.add(lf);
   menuDecor.visible=false;sc.add(menuDecor);
 })();
 
@@ -712,11 +738,11 @@ function mkRoadSurface(g,at){
     sp.rotation.x=-Math.PI/2;sp.rotation.z=rF(0,P2);
     sp.position.set(rF(-RW/2+.5,RW/2-.5),.014,rF(2,SL-2));g.add(sp);
   }
-  // Cloud puffs spilling over the road edges
-  [-1,1].forEach(function(s){var rHs=RW/2+2.2;for(var si2=0;si2<5;si2++){
-    var sr=rF(.5,1.2),sz=rF(1,SL-1);
-    var sm=new THREE.Mesh(new THREE.SphereGeometry(sr,6,5,0,P2,0,Math.PI/2),msnow);
-    sm.scale.y=.55;sm.position.set(s*(rHs+rF(0,1.5)),-.05,sz);g.add(sm);
+  // Toy bushes along the walkway edges
+  [-1,1].forEach(function(s){var rHs=RW/2+2.2;for(var si2=0;si2<4;si2++){
+    var sr=rF(.35,.7),sz=rF(1,SL-1);
+    var bsh=new THREE.Mesh(new THREE.SphereGeometry(sr,6,5,0,P2,0,Math.PI/2),cM(si2%2?0x6FA065:0x86B05E));
+    bsh.position.set(s*(rHs+rF(0,1.2)),0,sz);g.add(bsh);
   }});
   // Sidewalks + curbs (start past the corner on post-turn segments)
   var rH=RW/2+.3;
@@ -732,107 +758,110 @@ var mwarmDk=new THREE.MeshPhongMaterial({color:WARM3,shininess:20});
 
 function mkBuildings(g,side){
   var rH=RW/2+1.5,bx=side*(rH+1.5),z=2;
+  function barrel(x,zz,s2){
+    var body=new THREE.Mesh(new THREE.CylinderGeometry(.42*s2,.48*s2,1.1*s2,8),cM(0xA8743E));
+    body.position.set(x,.55*s2,zz);g.add(body);
+    [.28,.82].forEach(function(by){
+      var band=new THREE.Mesh(new THREE.CylinderGeometry(.5*s2,.5*s2,.09*s2,8),cM(0x6B4226));
+      band.position.set(x,by*s2,zz);g.add(band);
+    });
+    var top=new THREE.Mesh(new THREE.CylinderGeometry(.4*s2,.4*s2,.06,8),cM(0xC9A878));
+    top.position.set(x,1.12*s2,zz);g.add(top);
+  }
+  function crate(x,y,zz,s2){
+    var bx2=new THREE.Mesh(new THREE.BoxGeometry(s2,s2,s2),cM(0xB5854C));
+    bx2.position.set(x,y+s2/2,zz);bx2.rotation.y=rF(-.2,.2);g.add(bx2);
+    var fr2=new THREE.Mesh(new THREE.BoxGeometry(s2*1.04,s2*.16,s2*1.04),cM(0x8A5A30));
+    fr2.position.set(x,y+s2*.92,zz);fr2.rotation.y=bx2.rotation.y;g.add(fr2);
+  }
   while(z<SL-2){
     var type=rI(0,8);
     if(type<=2){
-      // Cotton candy trees
+      // Toy trees (broccoli-style)
       var cnt=rI(1,2);
       for(var ci=0;ci<cnt;ci++){
-        var tx=bx+side*rF(.5,2.5),tz=z+ci*rF(2.5,4),th=rF(2.4,4.2);
-        var tk=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,th*.5,5),msnow);
+        var tx=bx+side*rF(.5,2.5),tz=z+ci*rF(2.5,4),th=rF(2.2,3.8);
+        var tk=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,th*.5,5),cM(0x8A5A30));
         tk.position.set(tx,th*.25,tz);g.add(tk);
-        var pc=rC(CANDY);
-        var p1=new THREE.Mesh(new THREE.SphereGeometry(th*.42,8,7),cM(pc));
+        var p1=new THREE.Mesh(new THREE.SphereGeometry(th*.42,8,7),cM(ci%2?0x6FA065:0x5E8A55));
         p1.position.set(tx,th*.62,tz);p1.scale.y=.9;g.add(p1);
-        var p2=new THREE.Mesh(new THREE.SphereGeometry(th*.26,7,6),cM(rC(CANDY)));
-        p2.position.set(tx+rF(-.3,.3),th*.95,tz+rF(-.2,.2));g.add(p2);
+        var p2=new THREE.Mesh(new THREE.SphereGeometry(th*.24,7,6),cM(0x86B05E));
+        p2.position.set(tx+rF(-.3,.3),th*.92,tz+rF(-.2,.2));g.add(p2);
       }
       z+=cnt*4+rF(1,3);
     }else if(type===3){
-      // Gumdrop hill
-      var hr=rF(1.2,2.8);
-      var hill=new THREE.Mesh(new THREE.SphereGeometry(hr,8,6,0,P2,0,Math.PI/2),cM(rC(CANDY)));
-      hill.position.set(bx+side*hr*.4,0,z+hr);hill.scale.y=.75;g.add(hill);
-      var cap=new THREE.Mesh(new THREE.SphereGeometry(hr*.45,6,4,0,P2,0,Math.PI/2),msnow);
-      cap.position.set(hill.position.x,hr*.5,z+hr);g.add(cap);
-      z+=hr*2+rF(1,3);
+      // Barrel group
+      var bn=rI(1,3);
+      for(var bi2=0;bi2<bn;bi2++)barrel(bx+side*rF(.3,2),z+1+bi2*1.3,rF(.8,1.15));
+      if(Math.random()>.5)barrel(bx+side*rF(.5,1.5)+.5,z+1.6,.65);
+      z+=bn*1.5+rF(1,3);
     }else if(type===4){
-      // Lollipops
-      var cnt2=rI(2,3);
-      for(var ci2=0;ci2<cnt2;ci2++){
-        var lh=rF(1.8,3.6),lx=bx+side*rF(.3,2),lz=z+ci2*rF(1.4,2.4);
-        var stick=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,lh,5),msnow);
-        stick.position.set(lx,lh/2,lz);g.add(stick);
-        var dr=rF(.45,.8);
-        var disc=new THREE.Mesh(new THREE.CylinderGeometry(dr,dr,.18,10),cM(rC(CANDY)));
-        disc.rotation.x=HP;disc.rotation.z=rF(-.2,.2);
-        disc.position.set(lx,lh,lz);g.add(disc);
-      }
-      z+=cnt2*2.2+rF(1,2);
+      // Crate stacks
+      var ch2=rF(.9,1.3),cx3=bx+side*rF(.3,2),cz3=z+1.5;
+      crate(cx3,0,cz3,ch2);
+      if(Math.random()>.4)crate(cx3+rF(-.2,.2),ch2,cz3+rF(-.2,.2),ch2*.72);
+      if(Math.random()>.5)crate(cx3+ch2+.2,0,cz3+rF(-.5,.5),ch2*.8);
+      z+=3+rF(1,2.5);
     }else if(type===5){
-      // Giant balloon flower
-      var fh=rF(2.5,4.5),fx3=bx+side*rF(.8,2.2),fz=z+2;
-      var stem=new THREE.Mesh(new THREE.CylinderGeometry(.09,.13,fh,5),cM(0x7FBF6A));
-      stem.position.set(fx3,fh/2,fz);g.add(stem);
-      var fc=rC(CANDY),fr=rF(.55,.95);
-      for(var pp=0;pp<5;pp++){
-        var ang=pp/5*P2;
-        var pet=new THREE.Mesh(new THREE.SphereGeometry(fr*.62,7,6),cM(fc));
-        pet.position.set(fx3+Math.cos(ang)*fr,fh+Math.sin(ang)*fr*.85,fz);
-        pet.scale.z=.55;g.add(pet);
+      // Sack pile (tied flour sacks)
+      var sx3=bx+side*rF(.5,2),sz3=z+1.5,sn2=rI(2,3);
+      for(var si3=0;si3<sn2;si3++){
+        var sr3=rF(.45,.65);
+        var sack=new THREE.Mesh(new THREE.SphereGeometry(sr3,7,6),cM(0xC9A878));
+        sack.scale.y=.78;sack.position.set(sx3+si3*rF(.5,.8)-.4,sr3*.6,sz3+rF(-.3,.3));g.add(sack);
+        var tie=new THREE.Mesh(new THREE.ConeGeometry(sr3*.3,sr3*.4,5),cM(0xB5854C));
+        tie.position.set(sack.position.x,sr3*1.15,sack.position.z);g.add(tie);
       }
-      var core=new THREE.Mesh(new THREE.SphereGeometry(fr*.5,7,6),cM(0xFFE066));
-      core.position.set(fx3,fh,fz);core.scale.z=.6;g.add(core);
-      z+=4+rF(1,3);
+      z+=3+rF(1,2.5);
     }else if(type===6){
-      // Candy arch gate
-      var archH=rF(3.5,5.5),archW=rF(2,3);
-      var arch=new THREE.Mesh(new THREE.TorusGeometry(archW/2,.22,7,12,Math.PI),cM(rC(CANDY)));
-      arch.position.set(bx+side*1.5,archH*.6,z+3);arch.rotation.y=HP;g.add(arch);
+      // Dock gate (wooden posts + crossbeam)
+      var gh=rF(3,4.2),gw=rF(2,2.8),gx2=bx+side*1.5;
       [-1,1].forEach(function(ps){
-        var pil=new THREE.Mesh(new THREE.CylinderGeometry(.2,.26,archH*.6,6),msnow);
-        pil.position.set(bx+side*1.5,archH*.3,z+3+ps*archW/2);g.add(pil);
+        var post=new THREE.Mesh(new THREE.BoxGeometry(.26,gh,.26),cM(0x8A5A30));
+        post.position.set(gx2,gh/2,z+3+ps*gw/2);g.add(post);
       });
+      var beam=new THREE.Mesh(new THREE.BoxGeometry(.3,.34,gw+.8),cM(0xA8743E));
+      beam.position.set(gx2,gh,z+3);g.add(beam);
+      var flag=new THREE.Mesh(new THREE.ConeGeometry(.22,.5,4),cM(0xE8553C));
+      flag.rotation.z=side*HP;flag.position.set(gx2,gh+.3,z+3);g.add(flag);
       z+=6+rF(1,3);
     }else if(type===7){
-      // Macaron / marshmallow stack with cherry
-      var mx=bx+side*rF(.8,2),mz=z+2,my=0,n2=rI(2,4);
-      for(var si2=0;si2<n2;si2++){
-        var mr2=rF(.5,.9)*(1-si2*.18);
-        var mm=new THREE.Mesh(new THREE.SphereGeometry(mr2,8,6),si2%2?cM(0xFFD2E4):msnow);
-        mm.scale.y=.62;mm.position.set(mx,my+mr2*.5,mz);g.add(mm);
-        my+=mr2*.75;
+      // Signpost
+      var ph2=rF(2,2.8),px2=bx+side*rF(.8,2),pz2=z+2;
+      var pole=new THREE.Mesh(new THREE.CylinderGeometry(.08,.11,ph2,5),cM(0x8A5A30));
+      pole.position.set(px2,ph2/2,pz2);g.add(pole);
+      for(var sg2=0;sg2<2;sg2++){
+        var brd=new THREE.Mesh(new THREE.BoxGeometry(.9,.26,.08),cM(sg2?0xC9A878:0xB5854C));
+        brd.position.set(px2+(sg2?-.2:.25),ph2-.3-sg2*.4,pz2);
+        brd.rotation.y=rF(-.5,.5);g.add(brd);
       }
-      var cher=new THREE.Mesh(new THREE.SphereGeometry(.22,7,6),cM(0xFF6F8E));
-      cher.position.set(mx,my+.18,mz);g.add(cher);
-      z+=4+rF(1,3);
+      z+=3.5+rF(1,2.5);
     }else{
-      // Balloon cluster on strings
-      var bx2=bx+side*rF(.8,2.2),bz=z+2;
-      for(var bi=0;bi<3;bi++){
-        var bh2=rF(2.5,4.5),br2=rF(.35,.6);
-        var ox=rF(-.7,.7),oz=rF(-.5,.5);
-        var bal=new THREE.Mesh(new THREE.SphereGeometry(br2,8,7),cM(rC(CANDY)));
-        bal.scale.y=1.15;bal.position.set(bx2+ox,bh2,bz+oz);g.add(bal);
-        var str=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,bh2-br2,3),msnow);
-        str.position.set(bx2+ox,(bh2-br2)/2,bz+oz);g.add(str);
+      // Rope coil + small barrel
+      var rx=bx+side*rF(.5,1.8),rz=z+1.5;
+      for(var ri2=0;ri2<3;ri2++){
+        var coil=new THREE.Mesh(new THREE.TorusGeometry(.42-ri2*.05,.09,5,10),cM(0xC9A878));
+        coil.rotation.x=HP;coil.position.set(rx,.1+ri2*.15,rz);g.add(coil);
       }
-      z+=4+rF(1,3);
+      if(Math.random()>.4)barrel(rx+side*.2+1,rz+rF(-.5,.5),.7);
+      z+=3+rF(1,2.5);
     }
   }
 }
 
 function mkLights(g){
-  // Candy lamp posts — emissive balls only, NO PointLights (they forced
+  // Wooden lantern posts — emissive lantern boxes only, NO PointLights (they forced
   // full shader recompiles every new segment = the freeze spikes)
   var rH=RW/2+.3;
   for(var lz=8;lz<SL;lz+=18){
     [-1,1].forEach(function(s){
       var lx=s*(rH-.1);
-      var p=new THREE.Mesh(new THREE.CylinderGeometry(.07,.11,3.2,5),mpole);
-      p.position.set(lx,1.6,lz);g.add(p);
-      var bal=new THREE.Mesh(new THREE.SphereGeometry(.34,8,7),s>0?mLampA:mLampB);
-      bal.scale.y=1.1;bal.position.set(lx,3.45,lz);g.add(bal);
+      var p=new THREE.Mesh(new THREE.CylinderGeometry(.07,.11,3.0,5),mpole);
+      p.position.set(lx,1.5,lz);g.add(p);
+      var lan=new THREE.Mesh(new THREE.BoxGeometry(.32,.4,.32),s>0?mLampA:mLampB);
+      lan.position.set(lx,3.15,lz);g.add(lan);
+      var cap=new THREE.Mesh(new THREE.ConeGeometry(.3,.22,4),cM(0x8A5A30));
+      cap.position.set(lx,3.45,lz);cap.rotation.y=Math.PI/4;g.add(cap);
     });
   }
 }
@@ -849,25 +878,25 @@ function mkTurnJunction(g,tt){
   sideRoad.rotation.x=-Math.PI/2;
   sideRoad.position.set(dir*(RW/2+SL*.2),.006,SL+RW/2);g.add(sideRoad);
 
-  // Candy arch at the turn
-  var arch=new THREE.Mesh(new THREE.TorusGeometry(2.5,.18,7,12,Math.PI),cM(0xFF8FB8));
+  // Wooden arch at the turn
+  var arch=new THREE.Mesh(new THREE.TorusGeometry(2.5,.18,7,12,Math.PI),cM(0xA8743E));
   arch.position.set(dir*RW/2,2.5,SL+RW/2);
   arch.rotation.y=dir*HP;
   g.add(arch);
 
-  // Lollipop markers at corner
+  // Barrel markers at corner
   [-1,1].forEach(function(s){
-    var pH=rF(2.2,3.5);
-    var stick=new THREE.Mesh(new THREE.CylinderGeometry(.14,.2,pH,5),msnow);
-    stick.position.set(dir*(RW/2+s*RW*.4),pH/2,SL+RW/2+s*RW*.3);g.add(stick);
-    var disc=new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,.16,10),cM(rC(CANDY)));
-    disc.rotation.x=HP;disc.position.set(stick.position.x,pH+.4,stick.position.z);g.add(disc);
+    var bx3=dir*(RW/2+s*RW*.4),bz3=SL+RW/2+s*RW*.3;
+    var bar=new THREE.Mesh(new THREE.CylinderGeometry(.46,.52,1.15,8),cM(0xA8743E));
+    bar.position.set(bx3,.58,bz3);g.add(bar);
+    var band=new THREE.Mesh(new THREE.CylinderGeometry(.54,.54,.1,8),cM(0x6B4226));
+    band.position.set(bx3,.82,bz3);g.add(band);
   });
 
-  // Cream puffs at corner
+  // Bushes at corner
   for(var i=0;i<3;i++){
-    var sr=rF(.5,1.2);
-    var sm=new THREE.Mesh(new THREE.SphereGeometry(sr,5,4,0,P2,0,Math.PI/2),i%2?msnow:cM(0xFFD2E4));
+    var sr=rF(.4,.9);
+    var sm=new THREE.Mesh(new THREE.SphereGeometry(sr,5,4,0,P2,0,Math.PI/2),cM(i%2?0x6FA065:0x86B05E));
     sm.position.set(dir*(RW/2+rF(-1,RW*.3)),0,SL+RW/2+rF(-RW*.3,RW*.3));g.add(sm);
   }
 }
@@ -1255,7 +1284,7 @@ function iRd(){var a={l:act.l,r:act.r,j:act.j,s:act.s};act.l=act.r=act.j=act.s=f
 // ── FLOATING PETALS — single Points draw call (was 120 separate meshes) ──
 var PET_N=200,petT=0;
 var petG=new THREE.BufferGeometry(),petPos=new Float32Array(PET_N*3),petColA=new Float32Array(PET_N*3),petVel=[];
-var PETC=[[1,.62,.77],[1,.77,.42],[.72,.61,.92],[.5,.83,.67],[.44,.76,.96],[1,.88,.4]];
+var PETC=[[1,.96,.85],[1,.78,.45],[.91,.42,.31],[.55,.72,.5],[.66,.83,.93],[.96,.78,.3]];
 for(var pi=0;pi<PET_N;pi++){
   petPos[pi*3]=rF(-30,30);petPos[pi*3+1]=rF(0,16);petPos[pi*3+2]=rF(-10,45);
   var pc2=PETC[pi%PETC.length];
@@ -1284,9 +1313,9 @@ var st='menu',sc2=0,cc=0,dst=0,spd=BS,best=SV.best||0,isNB=false,diff=0,skI=0,sk
 var combo=0,comboT=0,maxCombo=0,scBonus=0,runPU=0,runNM=0,revived=false,nextMile=500,rvCost=100,rvTimer=null,lastEarn=0;
 var cdT=0,cdShown=99,dieT=0,lean=0,sq=1,turnSlow=0;
 var ZONES=[
-  {n:'草莓糖區',lr:lin(0xFFC272),ls:lin(0xFF9BC0),lc:lin(0xF55F96)},
-  {n:'薄荷雲區',lr:lin(0xBFE8D8),ls:lin(0x7FD4B8),lc:lin(0x3DAD8E)},
-  {n:'檸檬糖區',lr:lin(0xFFE08A),ls:lin(0xFFC46B),lc:lin(0xFF9838)}
+  {n:'蜂蜜棧道',lr:lin(0xFFFFFF),ls:lin(0x9DBFA0),lc:lin(0x8A5A30)},
+  {n:'翡翠棧道',lr:lin(0xD2E4D0),ls:lin(0x7FA8B5),lc:lin(0x5E7A48)},
+  {n:'夕陽棧道',lr:lin(0xFFD9A8),ls:lin(0xC98F6A),lc:lin(0x9C5A2E)}
 ];
 var pWX=0,pWZ=0; // player world position
 var camRotY=0; // smooth camera rotation tracking
