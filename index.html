@@ -918,14 +918,7 @@ function bldSeg(wx,wz,ang,tt,at){
 
 var turnCool=0; // segments since last turn (prevent consecutive)
 function genSeg(){
-  var tt=null;
-  if(sCnt>=5&&turnCool<=0){
-    var r=Math.random();
-    var turnChance=0.25+diff*0.15;
-    if(r<turnChance) tt=Math.random()<0.5?'left':'right';
-  }
-  if(tt) turnCool=2; // require 2 straight segments after a turn
-  else if(turnCool>0) turnCool--;
+  var tt=null; // 直線跑道：轉彎已停用（保留 mkTurnJunction 程式碼以備未來重啟）
   // Track if previous segment had a turn (for safe zone)
   var afterTurn=segs.length>0&&segs[segs.length-1].tt?true:false;
   var s=bldSeg(nPWX,nPWZ,nPAng,tt,afterTurn);
