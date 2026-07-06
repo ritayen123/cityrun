@@ -12,7 +12,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>SLED RUN 企鵝雪橇</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none; }
   html, body { width: 100%; height: 100%; overflow: hidden; touch-action: none; overscroll-behavior: none;
     font-family: ui-rounded, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif; background: #cfe4f4;
     user-select: none; -webkit-user-select: none; }
@@ -43,8 +44,8 @@
 
   /* 主選單 */
   #menu { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
-    padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 24px; pointer-events: auto;
-    transition: opacity .35s; overflow-y: auto; }
+    padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 24px);
+    pointer-events: auto; transition: opacity .35s; overflow-y: auto; }
   .hide { opacity: 0 !important; pointer-events: none !important; }
   #walletRow { display: flex; gap: 8px; width: 100%; justify-content: flex-start; }
   .pill { background: rgba(255,255,255,.8); border-radius: 20px; padding: 8px 14px; font-weight: 800;
@@ -75,7 +76,7 @@
   .ov { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
     background: rgba(240,246,252,.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     transition: opacity .3s; pointer-events: auto; overflow-y: auto;
-    padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 28px; }
+    padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 28px); }
   .ovTitle { font-size: 30px; font-weight: 900; color: #fff; letter-spacing: 2px; margin: 6px 0 14px;
     text-shadow: 0 3px 0 #a8c4e0, 0 8px 22px rgba(90,130,175,.4); }
   .backBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 14px;
@@ -128,6 +129,12 @@
     align-items: center; justify-content: center; font-size: 30px; font-weight: 900; color: #f28c2e;
     box-shadow: 0 6px 18px rgba(90,130,175,.3); margin-bottom: 6px; }
   .ghostBtn { background: rgba(255,255,255,.85) !important; color: #6f8cab !important; }
+  /* 橫向提示（手機轉橫時） */
+  #rotateHint { position: fixed; inset: 0; z-index: 99; display: none; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px; background: #cfe4f4;
+    font-size: 18px; font-weight: 800; color: #4d6a82; }
+  #rotateHint span { font-size: 44px; }
+  @media (orientation: landscape) and (max-height: 520px) { #rotateHint { display: flex; } }
 
   /* 結算 */
   #overScreen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
@@ -154,6 +161,7 @@
   <div id="hud"><div id="dist">0m</div><div id="fishHud">🐟 0</div><div id="buffs"></div></div>
   <div id="toast"></div>
   <button id="muteBtn">🔊</button>
+  <div id="rotateHint"><span>📱</span>請將手機轉回直向</div>
   <!-- 主選單 -->
   <div id="menu">
     <div id="walletRow"><span class="pill" id="mFish">🐟 0</span><span class="pill" id="mTicket">❤️ 0</span></div>
