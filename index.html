@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#cfe4f4">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐧</text></svg>">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>SLED RUN 企鵝雪橇</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -36,16 +41,93 @@
     width: 44px; height: 44px; border-radius: 50%; border: none; background: rgba(255,255,255,.75);
     font-size: 20px; pointer-events: auto; cursor: pointer; box-shadow: 0 3px 10px rgba(90,130,175,.25); }
 
-  /* 起始畫面 */
-  #startScreen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
-    justify-content: flex-start; padding-top: 16vh; transition: opacity .45s; }
-  #title { font-size: min(15vw, 72px); font-weight: 900; color: #fff; letter-spacing: 2px;
+  /* 主選單 */
+  #menu { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+    padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 24px; pointer-events: auto;
+    transition: opacity .35s; overflow-y: auto; }
+  .hide { opacity: 0 !important; pointer-events: none !important; }
+  #walletRow { display: flex; gap: 8px; width: 100%; justify-content: flex-start; }
+  .pill { background: rgba(255,255,255,.8); border-radius: 20px; padding: 8px 14px; font-weight: 800;
+    color: #4d6a82; font-size: 15px; box-shadow: 0 3px 10px rgba(90,130,175,.2); }
+  #menuTitle { margin-top: 3vh; font-size: min(13vw, 58px); font-weight: 900; color: #fff; letter-spacing: 2px;
     text-shadow: 0 3px 0 #a8c4e0, 0 10px 26px rgba(90,130,175,.4); }
-  #subtitle { margin-top: 6px; font-size: 15px; font-weight: 700; color: #7d9cbd; letter-spacing: 6px; }
-  #tapHint { position: absolute; bottom: 18vh; font-size: 18px; font-weight: 700; color: #6f92b5;
-    animation: pulse 1.4s ease-in-out infinite; }
-  #bestLine { position: absolute; bottom: 13vh; font-size: 14px; font-weight: 600; color: #93aecb; }
-  @keyframes pulse { 0%,100% { opacity: .45; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
+  #menuSub { font-size: 13px; font-weight: 700; color: #7d9cbd; letter-spacing: 6px; margin-bottom: 2vh; }
+  .mBtn { width: min(78vw, 320px); margin-top: 12px; padding: 14px 0; border: none; border-radius: 26px;
+    font-family: inherit; font-size: 18px; font-weight: 800; color: #fff; cursor: pointer;
+    box-shadow: 0 6px 16px rgba(90,130,175,.3); }
+  .mBtn small { display: block; font-size: 12px; font-weight: 700; opacity: .9; margin-top: 2px; }
+  .mBtn:active { transform: scale(.97); }
+  #btnLevel { background: linear-gradient(180deg, #ffb35c, #f28c2e); }
+  #btnEndless { background: linear-gradient(180deg, #7fb2e8, #4f86c8); }
+  #btnShop { background: linear-gradient(180deg, #8ed08f, #5aa86c); }
+  #dailyPanel { width: min(88vw, 344px); margin-top: 2.2vh; background: rgba(255,255,255,.85);
+    border-radius: 18px; padding: 12px 14px; box-shadow: 0 6px 18px rgba(90,130,175,.2); }
+  #dailyPanel h4 { font-size: 13px; color: #8ba3bd; letter-spacing: 2px; margin-bottom: 4px; text-align: left; }
+  .taskRow { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #4d6a82;
+    font-weight: 700; margin: 8px 0; }
+  .taskRow .tn { flex: 1.4; text-align: left; }
+  .taskRow .bar { flex: 1; height: 6px; background: #dde8f2; border-radius: 3px; overflow: hidden; }
+  .taskRow .bar i { display: block; height: 100%; background: linear-gradient(90deg, #ffb35c, #f28c2e); }
+  .claimBtn { border: none; border-radius: 12px; padding: 5px 10px; font-family: inherit; font-size: 12px;
+    font-weight: 800; color: #fff; background: linear-gradient(180deg, #ffb35c, #f28c2e); cursor: pointer; }
+  .claimBtn:disabled { background: #c9d6e2; }
+  /* 通用覆蓋頁 */
+  .ov { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+    background: rgba(240,246,252,.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    transition: opacity .3s; pointer-events: auto; overflow-y: auto;
+    padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 28px; }
+  .ovTitle { font-size: 30px; font-weight: 900; color: #fff; letter-spacing: 2px; margin: 6px 0 14px;
+    text-shadow: 0 3px 0 #a8c4e0, 0 8px 22px rgba(90,130,175,.4); }
+  .backBtn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 14px;
+    width: 42px; height: 42px; border-radius: 50%; border: none; background: rgba(255,255,255,.88);
+    font-size: 18px; font-weight: 800; color: #4d6a82; cursor: pointer;
+    box-shadow: 0 3px 10px rgba(90,130,175,.25); }
+  /* 選關 */
+  #lvGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: min(88vw, 360px); }
+  .lvNode { background: rgba(255,255,255,.9); border-radius: 18px; padding: 13px 8px; text-align: center;
+    cursor: pointer; box-shadow: 0 5px 14px rgba(90,130,175,.22); border: none; font-family: inherit; }
+  .lvNode.lock { opacity: .45; }
+  .lvNode .n { font-size: 21px; font-weight: 900; color: #4d6a82; }
+  .lvNode .len { font-size: 11px; color: #8ba3bd; font-weight: 700; }
+  .lvNode .st { font-size: 13px; color: #f0a132; letter-spacing: 2px; margin-top: 2px; min-height: 16px; }
+  /* 商店 */
+  #shopTabs { display: flex; gap: 8px; margin-bottom: 12px; }
+  .tabBtn { border: none; border-radius: 16px; padding: 8px 18px; font-family: inherit; font-weight: 800;
+    font-size: 14px; color: #6f8cab; background: rgba(255,255,255,.6); cursor: pointer; }
+  .tabBtn.on { background: #fff; color: #f28c2e; box-shadow: 0 3px 10px rgba(90,130,175,.25); }
+  .shopRow { display: flex; align-items: center; gap: 10px; width: min(88vw, 360px);
+    background: rgba(255,255,255,.9); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(90,130,175,.18); }
+  .shopRow .ic { font-size: 26px; width: 34px; }
+  .shopRow .info { flex: 1; text-align: left; }
+  .shopRow .nm { font-size: 15px; font-weight: 800; color: #4d6a82; }
+  .shopRow .ds { font-size: 12px; color: #8ba3bd; font-weight: 600; }
+  .buyBtn { border: none; border-radius: 14px; padding: 8px 12px; font-family: inherit; font-size: 13px;
+    font-weight: 800; color: #fff; background: linear-gradient(180deg, #ffb35c, #f28c2e);
+    cursor: pointer; white-space: nowrap; }
+  .buyBtn:disabled { background: #c9d6e2; }
+  .buyBtn.eq { background: linear-gradient(180deg, #8ed08f, #5aa86c); }
+  .dot { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 -3px 6px rgba(0,0,0,.18); }
+  /* 過關/簽到/復活 */
+  #clearStars { font-size: 44px; letter-spacing: 10px; margin: 4px 0 10px; }
+  #clearScreen:not(.hide) #clearStars { animation: starPop .6s ease-out; }
+  @keyframes starPop { 0% { transform: scale(0); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  #signinCard { background: rgba(255,255,255,.94); border-radius: 22px; padding: 20px 22px; text-align: center;
+    box-shadow: 0 10px 30px rgba(90,130,175,.3); width: min(84vw, 330px); margin: auto 0; }
+  #signinDays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 14px 0; }
+  .dayChip { border-radius: 12px; padding: 8px 0 6px; font-size: 11px; font-weight: 800; color: #8ba3bd;
+    background: #eef4fa; }
+  .dayChip b { display: block; font-size: 12px; color: #4d6a82; }
+  .dayChip.got { background: #dff0dd; color: #5aa86c; }
+  .dayChip.today { background: linear-gradient(180deg, #ffd9a3, #ffc16e); color: #9a5c14; }
+  .dayChip.today b { color: #7b4308; }
+  #reviveBox { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 12px; background: rgba(240,246,252,.35); backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); pointer-events: auto; transition: opacity .3s; }
+  #revCount { width: 72px; height: 72px; border-radius: 50%; background: #fff; display: flex;
+    align-items: center; justify-content: center; font-size: 30px; font-weight: 900; color: #f28c2e;
+    box-shadow: 0 6px 18px rgba(90,130,175,.3); margin-bottom: 6px; }
+  .ghostBtn { background: rgba(255,255,255,.85) !important; color: #6f8cab !important; }
 
   /* 結算 */
   #overScreen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
@@ -72,12 +154,63 @@
   <div id="hud"><div id="dist">0m</div><div id="fishHud">🐟 0</div><div id="buffs"></div></div>
   <div id="toast"></div>
   <button id="muteBtn">🔊</button>
-  <div id="startScreen">
-    <div id="title">SLED RUN</div>
-    <div id="subtitle">企鵝雪橇</div>
-    <div id="tapHint">點擊開始滑行</div>
-    <div id="bestLine"></div>
+  <!-- 主選單 -->
+  <div id="menu">
+    <div id="walletRow"><span class="pill" id="mFish">🐟 0</span><span class="pill" id="mTicket">❤️ 0</span></div>
+    <div id="menuTitle">SLED RUN</div>
+    <div id="menuSub">企鵝雪橇</div>
+    <button class="mBtn" id="btnLevel">關卡模式<small id="lvHint">第 1 關</small></button>
+    <button class="mBtn" id="btnEndless">無盡模式<small id="bestHint">最佳 0 分</small></button>
+    <button class="mBtn" id="btnShop">商店<small>升級・皮膚・補給</small></button>
+    <div id="dailyPanel"><h4>📋 每日任務</h4><div id="taskList"></div></div>
   </div>
+  <!-- 每日簽到 -->
+  <div id="signinBox" class="ov hide">
+    <div id="signinCard">
+      <div style="font-size:20px;font-weight:900;color:#4d6a82">每日簽到</div>
+      <div id="signinStreak" style="font-size:13px;color:#8ba3bd;font-weight:700;margin-top:4px"></div>
+      <div id="signinDays"></div>
+      <button class="mBtn" id="signinClaim" style="width:100%">領取</button>
+    </div>
+  </div>
+  <!-- 選關 -->
+  <div id="lvSelect" class="ov hide">
+    <button class="backBtn" data-back="lvSelect">‹</button>
+    <div class="ovTitle">選擇關卡</div>
+    <div id="lvGrid"></div>
+  </div>
+  <!-- 商店 -->
+  <div id="shop" class="ov hide">
+    <button class="backBtn" data-back="shop">‹</button>
+    <div class="ovTitle">商店 <span class="pill" id="sFish" style="font-size:14px">🐟 0</span></div>
+    <div id="shopTabs">
+      <button class="tabBtn on" data-tab="up">升級</button>
+      <button class="tabBtn" data-tab="skin">皮膚</button>
+      <button class="tabBtn" data-tab="sup">補給</button>
+    </div>
+    <div id="shopList"></div>
+  </div>
+  <!-- 過關 -->
+  <div id="clearScreen" class="ov hide" style="justify-content:center">
+    <div class="ovTitle" id="clearTitle">過關！</div>
+    <div id="clearStars">★★★</div>
+    <div id="overCardC" style="background:rgba(255,255,255,.9);border-radius:22px;padding:20px 38px;box-shadow:0 10px 30px rgba(90,130,175,.25)">
+      <div class="statRow"><span class="k">收集小魚</span><span class="v" id="clFish">0</span></div>
+      <div class="statRow"><span class="k">過關獎勵</span><span class="v" id="clBonus">0</span></div>
+      <div class="statRow"><span class="k">存入錢包</span><span class="v" id="clTotal">0 🐟</span></div>
+    </div>
+    <button class="mBtn" id="clNext" style="background:linear-gradient(180deg,#ffb35c,#f28c2e)">下一關</button>
+    <button class="mBtn ghostBtn" id="clMenu">主選單</button>
+  </div>
+  <!-- 復活 -->
+  <div id="reviveBox" class="hide">
+    <div style="font-size:24px;font-weight:900;color:#4d6a82">繼續滑行？</div>
+    <div id="revCount">5</div>
+    <button class="mBtn" id="revTicket" style="background:linear-gradient(180deg,#f08a8a,#d84848)">❤️ 用復活券（剩 0）</button>
+    <button class="mBtn" id="revFish" style="background:linear-gradient(180deg,#ffb35c,#f28c2e)">🐟 150 復活</button>
+    <button class="mBtn ghostBtn" id="revGiveup">放棄</button>
+  </div>
+  <!-- 結算（無盡/失敗） -->
   <div id="overScreen">
     <div id="overTitle">哎呀！</div>
     <div id="newBest">★ 新紀錄 ★</div>
@@ -88,6 +221,7 @@
       <div class="statRow"><span class="k">最佳</span><span class="v" id="ovBest">0</span></div>
     </div>
     <button id="retryBtn">再滑一次</button>
+    <button class="mBtn ghostBtn" id="ovMenu" style="margin-top:12px">主選單</button>
   </div>
 </div>
 <script src="https://unpkg.com/three@0.150.0/build/three.min.js"></script>
@@ -125,20 +259,24 @@ document.body.prepend(renderer.domElement);
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xdfe9f5, 60, 250);
 
-// 天空漸層
-{
+// 天空漸層（日／夜兩套）
+function makeSky(top, mid, bot) {
   const c = document.createElement('canvas'); c.width = 2; c.height = 256;
   const g = c.getContext('2d');
   const gr = g.createLinearGradient(0, 0, 0, 256);
-  gr.addColorStop(0, '#a9cdea'); gr.addColorStop(.55, '#cbe1f2'); gr.addColorStop(1, '#eef5fb');
+  gr.addColorStop(0, top); gr.addColorStop(.55, mid); gr.addColorStop(1, bot);
   g.fillStyle = gr; g.fillRect(0, 0, 2, 256);
   const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding;
-  scene.background = tex;
+  return tex;
 }
+const skyDay = makeSky('#a9cdea', '#cbe1f2', '#eef5fb');
+const skyNight = makeSky('#1e2c47', '#35496b', '#5b6f92');
+scene.background = skyDay;
 
 const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, .1, 400);
 
-scene.add(new THREE.HemisphereLight(0xcfe2f5, 0xffffff, .95));
+const hemi = new THREE.HemisphereLight(0xcfe2f5, 0xffffff, .95);
+scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff4e0, .85);
 sun.position.set(-30, 60, -20);
 scene.add(sun);
@@ -188,6 +326,15 @@ const grounds = [0, 1].map(i => {
   p.rotation.x = -Math.PI / 2;
   return p;
 });
+const groundMats = grounds.map(g => g.material);
+// 夜間關卡配色切換
+function applyNight(on) {
+  scene.background = on ? skyNight : skyDay;
+  scene.fog.color.setHex(on ? 0x3a4a63 : 0xdfe9f5);
+  hemi.intensity = on ? .55 : .95;
+  sun.intensity = on ? .35 : .85;
+  groundMats.forEach(m => m.color.setHex(on ? 0xc9d4e8 : 0xf5f9fd));
+}
 // 依滑道座標把地面頂點抬成坡面（換段接力時重算一次即可）
 function computeGround(p) {
   const pos = p.geometry.attributes.position;
@@ -349,6 +496,23 @@ function makePole() {
   g.userData.r = .55;
   return g;
 }
+function makeFinishGate() {
+  const g = new THREE.Group();
+  [-8.5, 8.5].forEach(x =>
+    mesh(new THREE.CylinderGeometry(.22, .26, 5.4, 8), mat(0xc9812f, { flatShading: true }), x, 2.7, 0, g));
+  const c = document.createElement('canvas'); c.width = 512; c.height = 96;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#e8542f'; ctx.fillRect(0, 0, 512, 96);
+  ctx.fillStyle = '#fff'; ctx.font = '900 54px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('🏁 FINISH 🏁', 256, 52);
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+  const banner = new THREE.Mesh(new THREE.BoxGeometry(17, 1.7, .15), new THREE.MeshLambertMaterial({ map: t }));
+  banner.position.y = 4.8;
+  g.add(banner);
+  g.userData.decor = true;
+  return g;
+}
 const FLAG_COLORS = [0x8e5bd1, 0xd34a4a, 0x4ab8b0, 0xe3c04a];
 function makeFlagLine() {
   const g = new THREE.Group();
@@ -366,21 +530,26 @@ function makeFlagLine() {
 }
 
 // ---------- 企鵝＋雪橇 ----------
+// 專屬材質（皮膚系統換色用，不進共用快取）
+const pengBodyMat = new THREE.MeshLambertMaterial({ color: 0x23262b });
+const pengBellyMat = new THREE.MeshLambertMaterial({ color: 0xf7fafc });
+const sledMatA = new THREE.MeshLambertMaterial({ color: 0x3f76d8 });
+const sledMatB = new THREE.MeshLambertMaterial({ color: 0x5b8de4 });
 const player = new THREE.Group();
 const sled = new THREE.Group();
 {
-  mesh(new THREE.CylinderGeometry(.78, .85, .16, 18), mat(0x3f76d8), 0, .1, 0, sled).scale.set(.82, 1, 1.12);
-  mesh(new THREE.CylinderGeometry(.62, .66, .06, 18), mat(0x5b8de4), 0, .2, 0, sled).scale.set(.82, 1, 1.12);
+  mesh(new THREE.CylinderGeometry(.78, .85, .16, 18), sledMatA, 0, .1, 0, sled).scale.set(.82, 1, 1.12);
+  mesh(new THREE.CylinderGeometry(.62, .66, .06, 18), sledMatB, 0, .2, 0, sled).scale.set(.82, 1, 1.12);
 }
 player.add(sled);
 const penguin = new THREE.Group();
 {
-  mesh(new THREE.SphereGeometry(.5, 14, 12), mat(0x23262b), 0, .62, 0, penguin).scale.set(1, 1.15, 1.02);
-  mesh(new THREE.SphereGeometry(.42, 12, 10), mat(0xf7fafc), 0, .56, .13, penguin).scale.set(.72, .92, .62);
+  mesh(new THREE.SphereGeometry(.5, 14, 12), pengBodyMat, 0, .62, 0, penguin).scale.set(1, 1.15, 1.02);
+  mesh(new THREE.SphereGeometry(.42, 12, 10), pengBellyMat, 0, .56, .13, penguin).scale.set(.72, .92, .62);
   mesh(new THREE.ConeGeometry(.09, .2, 8), mat(0xf2a03d), 0, .78, .47, penguin).rotation.x = Math.PI / 2;
   [-1, 1].forEach(s => {
     mesh(new THREE.SphereGeometry(.05, 8, 6), mat(0xffffff), s * .14, .88, .4, penguin);
-    const fl = mesh(new THREE.SphereGeometry(.2, 8, 6), mat(0x23262b), s * .48, .58, 0, penguin);
+    const fl = mesh(new THREE.SphereGeometry(.2, 8, 6), pengBodyMat, s * .48, .58, 0, penguin);
     fl.scale.set(.42, 1, .78); fl.rotation.z = s * .5;
     mesh(new THREE.BoxGeometry(.2, .07, .34), mat(0xf2a03d), s * .2, .2, .32, penguin).rotation.y = s * .18;
   });
@@ -488,6 +657,60 @@ function makeBoostItem() {
   mesh(new THREE.OctahedronGeometry(.22, 0), mat(0xfff3c8, { flatShading: true }), 0, 0, 0, g);
   return g;
 }
+const boxTex = (() => {  // ❓ 驚喜箱貼圖
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#f0a132'; g.fillRect(0, 0, 128, 128);
+  g.strokeStyle = '#ffd98a'; g.lineWidth = 10; g.strokeRect(5, 5, 118, 118);
+  g.fillStyle = '#fff'; g.font = '900 84px sans-serif';
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('?', 64, 70);
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+  return t;
+})();
+function makeItemBox() {
+  const g = new THREE.Group();
+  mesh(new THREE.BoxGeometry(.85, .85, .85),
+    new THREE.MeshLambertMaterial({ map: boxTex }), 0, 0, 0, g).rotation.z = .3;
+  return g;
+}
+function makeMushItem() {
+  const g = new THREE.Group();
+  mesh(new THREE.CylinderGeometry(.16, .2, .3, 8), mat(0xfff4e0), 0, -.18, 0, g);
+  const cap = mesh(new THREE.SphereGeometry(.36, 12, 8), mat(0xd84848), 0, .05, 0, g);
+  cap.scale.set(1, .72, 1);
+  [[0, .2, .3], [-.26, .18, -.12], [.26, .18, -.12]].forEach(([x, y, z]) =>
+    mesh(new THREE.SphereGeometry(.09, 6, 5), mat(0xffffff), x, y, z, g));
+  return g;
+}
+function makeStarItem() {
+  const shape = new THREE.Shape();
+  for (let i = 0; i < 10; i++) {
+    const a = i * Math.PI / 5 - Math.PI / 2, r = i % 2 ? .2 : .46;
+    i ? shape.lineTo(Math.cos(a) * r, Math.sin(a) * r) : shape.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+  }
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: .14, bevelEnabled: false });
+  const g = new THREE.Group();
+  mesh(geo, mat(0xffd24a, { flatShading: true, emissive: 0x8a6a10 }), 0, 0, -.07, g);
+  return g;
+}
+function makeBulletItem() {
+  const g = new THREE.Group();
+  const body = mesh(new THREE.CapsuleGeometry(.24, .4, 4, 10), mat(0x2b2f36, { flatShading: true }), 0, 0, 0, g);
+  body.rotation.x = Math.PI / 2;
+  mesh(new THREE.CylinderGeometry(.25, .25, .16, 10), mat(0xf0a132), 0, 0, .28, g).rotation.x = Math.PI / 2;
+  [-1, 1].forEach(s => mesh(new THREE.SphereGeometry(.06, 6, 5), mat(0xffffff), s * .12, .1, -.2, g));
+  return g;
+}
+function makeBoltItem() {
+  const shape = new THREE.Shape();
+  shape.moveTo(.1, .5); shape.lineTo(-.22, .04); shape.lineTo(-.02, .04);
+  shape.lineTo(-.1, -.5); shape.lineTo(.22, -.02); shape.lineTo(.02, -.02); shape.lineTo(.1, .5);
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: .12, bevelEnabled: false });
+  const g = new THREE.Group();
+  mesh(geo, mat(0xffe14a, { flatShading: true, emissive: 0x8a7a10 }), 0, 0, -.06, g);
+  return g;
+}
 
 // ---------- 雪花噴濺粒子池 ----------
 const puffs = [];
@@ -572,37 +795,119 @@ const AudioSys = {
   }
 };
 
+// ---------- 存檔與經濟設定 ----------
+const SAVE_KEY = 'sledrun_save_v1';
+const TICKET_PRICE = 80, REVIVE_FISH = 150, TASK_REWARD = 150;
+const SIGNIN_REWARDS = [50, 80, 120, 160, 200, 250, 300];
+const UPGRADES = {
+  magnet: { icon: '🧲', name: '磁鐵強化', max: 5, price: [100, 250, 500, 900, 1500], desc: l => `吸魚持續 ${(8 + l * 1.6).toFixed(1)} 秒` },
+  boost:  { icon: '🚀', name: '衝刺強化', max: 5, price: [100, 250, 500, 900, 1500], desc: l => `衝刺持續 ${(4 + l * .8).toFixed(1)} 秒` },
+  shield: { icon: '🛡', name: '開局護盾', max: 3, price: [200, 600, 1200], desc: l => `每局 ${[0, 30, 60, 100][l]}% 機率自帶護盾` },
+  head:   { icon: '🎿', name: '起步衝刺', max: 3, price: [150, 450, 900], desc: l => `開場自動衝刺 ${[0, 2, 3, 4][l]} 秒` },
+};
+const PENG_SKINS = [
+  { id: 'classic', name: '小黑', body: 0x23262b, belly: 0xf7fafc, price: 0 },
+  { id: 'blue',    name: '藍莓', body: 0x3d5a8f, belly: 0xe8f1fb, price: 300 },
+  { id: 'pink',    name: '櫻花', body: 0xd77fa3, belly: 0xfff0f5, price: 300 },
+  { id: 'mint',    name: '薄荷', body: 0x4aa89a, belly: 0xeafff8, price: 600 },
+  { id: 'gold',    name: '黃金', body: 0xd9a92e, belly: 0xfff3c8, price: 1500 },
+];
+const SLED_SKINS = [
+  { id: 'blue',   name: '經典藍', c1: 0x3f76d8, c2: 0x5b8de4, price: 0 },
+  { id: 'red',    name: '火焰紅', c1: 0xd84848, c2: 0xe86a6a, price: 250 },
+  { id: 'green',  name: '青蘋果', c1: 0x4aa860, c2: 0x6cc481, price: 250 },
+  { id: 'purple', name: '葡萄紫', c1: 0x8e5bd1, c2: 0xa87ce0, price: 500 },
+  { id: 'gold',   name: '黃金',   c1: 0xd9a92e, c2: 0xf0c65a, price: 1200 },
+];
+const LEVELS = [
+  { len: 500,  theme: 0, night: false, spd: .85, dens: .75, fishGoal: 18 },
+  { len: 650,  theme: 1, night: false, spd: .9,  dens: .85, fishGoal: 25 },
+  { len: 800,  theme: 0, night: false, spd: .95, dens: .95, fishGoal: 32 },
+  { len: 950,  theme: 1, night: true,  spd: 1,   dens: 1,   fishGoal: 40 },
+  { len: 1100, theme: 0, night: true,  spd: 1.05, dens: 1.05, fishGoal: 48 },
+  { len: 1300, theme: 1, night: false, spd: 1.1, dens: 1.15, fishGoal: 56 },
+  { len: 1500, theme: 0, night: false, spd: 1.15, dens: 1.25, fishGoal: 65 },
+  { len: 1700, theme: 1, night: true,  spd: 1.2, dens: 1.35, fishGoal: 75 },
+  { len: 1900, theme: 0, night: true,  spd: 1.25, dens: 1.45, fishGoal: 85 },
+  { len: 2200, theme: 1, night: true,  spd: 1.3, dens: 1.55, fishGoal: 100 },
+];
+const TASK_POOL = [
+  { id: 'dist400', name: '單局滑行 400m', target: 400, stat: 'maxDist' },
+  { id: 'dist800', name: '單局滑行 800m', target: 800, stat: 'maxDist' },
+  { id: 'fish25',  name: '單局收 25 條魚', target: 25, stat: 'maxFish' },
+  { id: 'fishT60', name: '累計收 60 條魚', target: 60, stat: 'fish' },
+  { id: 'jump5',   name: '跳台起跳 5 次', target: 5, stat: 'jumps' },
+  { id: 'smash4',  name: '撞碎 4 個障礙', target: 4, stat: 'smash' },
+  { id: 'runs3',   name: '完成 3 局滑行', target: 3, stat: 'runs' },
+  { id: 'item3',   name: '撿到 3 個道具', target: 3, stat: 'items' },
+];
+let S = (() => {
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (s && s.up) return s;
+  } catch (e) {}
+  return {
+    fish: 0, tickets: 0,
+    up: { magnet: 0, boost: 0, shield: 0, head: 0 },
+    skins: { peng: ['classic'], sled: ['blue'], eqPeng: 'classic', eqSled: 'blue' },
+    stars: {}, unlocked: 1,
+    best: +(localStorage.getItem(BEST_KEY) || 0),  // 沿用改版前最佳分數
+    daily: { last: '', streak: 0, tDate: '', tasks: [] },
+  };
+})();
+function save() { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }
+function applySkins() {
+  const p = PENG_SKINS.find(s => s.id === S.skins.eqPeng) || PENG_SKINS[0];
+  const sl = SLED_SKINS.find(s => s.id === S.skins.eqSled) || SLED_SKINS[0];
+  pengBodyMat.color.setHex(p.body);
+  pengBellyMat.color.setHex(p.belly);
+  sledMatA.color.setHex(sl.c1);
+  sledMatB.color.setHex(sl.c2);
+}
+
 // ---------- 遊戲狀態 ----------
 const world = new THREE.Group();  // 所有會移動的物件
 scene.add(world);
 let obstacles = [];   // {g, r, ramp}
 let items = [];       // {g, type, baseY, phase}
-let state = 'title';  // title | run | crash | over
+let state = 'menu';   // menu | run | crash | revive | over | clear
+let mode = 'endless', curLv = 0, lvConf = null;
+let finishSpawned = false, diedThisRun = false;
+let runJumps = 0, runSmash = 0, runItems = 0;
+let magnetDur = 8, boostDur = 4;
 let dist = 0, speed = 0, px = 0, pvx = 0, py = 0, pvy = 0, grounded = true;
 let targetX = 0, pointerActive = false;
 let spawnAt = 30, decorAt = 10, flagAt = 120, fishAt = 40, itemAt = 160;
 let fishCount = 0, shieldOn = false, magnetT = 0, boostT = 0, invulnT = 0;
+let dashT = 0, starT = 0, bulletT = 0, lightningT = 0, starWas = false;
 let crashT = 0;
 let penguinFly = null;
-let best = +(localStorage.getItem(BEST_KEY) || 0);
 let speedTier = 0;
-if (location.hash.startsWith('#d=')) {  // 測試用：指定起始距離
-  dist = +location.hash.slice(3) || 0;
-  speedTier = Math.floor(dist / 250);
-  fishAt = dist + 30; itemAt = dist + 90;
-}
-const RAMP_BOOST = location.hash.includes('ramp');  // 測試用：狂出跳台
+// 測試後門（網址 hash）
+const DEBUG_D = location.hash.match(/d=(\d+)/) ? +location.hash.match(/d=(\d+)/)[1] : 0;
+const RAMP_BOOST = location.hash.includes('ramp');
+const DEBUG_ITEMS = location.hash.includes('items');
+const DEBUG_JUMP = location.hash.includes('jump');
 
 const $ = id => document.getElementById(id);
-$('bestLine').textContent = best ? `最佳紀錄 ${best} 分` : '';
+const show = id => $(id).classList.remove('hide');
+const hide = id => $(id).classList.add('hide');
+if (location.hash.includes('fish=')) { S.fish += +location.hash.match(/fish=(\d+)/)[1]; save(); }
 
-function themeAt(d) { return Math.floor(d / THEME_LEN) % 2; }  // 0 雪山 1 城市
+function themeAt(d) {  // 0 雪山 1 城市（關卡模式依關卡起始主題偏移）
+  return (Math.floor(d / THEME_LEN) + (mode === 'level' && lvConf ? lvConf.theme : 0)) % 2;
+}
 
 // ---------- 生成 ----------
 function place(g, x, z) {
   g.position.set(x, terrainH(dist - z), z);  // 貼合坡面
   world.add(g);
-  if (!g.userData.decor) obstacles.push({ g, r: g.userData.r || 1, ramp: !!g.userData.ramp });
+  if (!g.userData.decor) {
+    let r = g.userData.r || 1;
+    const ramp = !!g.userData.ramp;
+    if (lightningT > 0 && !ramp) { g.scale.multiplyScalar(.4); r *= .4; }  // 閃電期間新障礙也縮小
+    obstacles.push({ g, r, ramp });
+  }
 }
 function placeItem(g, x, z, type, arcY) {
   const baseY = terrainH(dist - z) + .9 + (arcY || 0);
@@ -612,8 +917,15 @@ function placeItem(g, x, z, type, arcY) {
 }
 function spawnStep() {
   const aheadTheme = themeAt(dist - SPAWN_Z);
-  const gap = Math.max(11, 19 - dist * .01);  // 障礙間距隨距離縮短
-  if (dist >= spawnAt) {
+  const dens = mode === 'level' ? lvConf.dens : 1;
+  const gap = Math.max(11, 19 - dist * .01) / dens;  // 障礙間距隨距離與關卡難度縮短
+  // 關卡模式：終點門與終點前停止生成（門提早 20m，過線後布條先滑出畫面再結算）
+  const noMore = mode === 'level' && dist >= lvConf.len - 210;
+  if (mode === 'level' && !finishSpawned && dist - SPAWN_Z >= lvConf.len - 20) {
+    finishSpawned = true;
+    place(makeFinishGate(), 0, SPAWN_Z);
+  }
+  if (!noMore && dist >= spawnAt) {
     spawnAt = dist + gap * (0.7 + Math.random() * .6);
     const x = (Math.random() * 2 - 1) * (TRACK_HALF - 1);
     const roll = Math.random();
@@ -647,23 +959,56 @@ function spawnStep() {
       }
     });
   }
-  if (aheadTheme === 1 && dist >= flagAt) {
+  if (!noMore && aheadTheme === 1 && dist >= flagAt) {
     flagAt = dist + 40 + Math.random() * 25;
     place(makeFlagLine(), 0, SPAWN_Z);
   }
   // 小魚成排
-  if (dist >= fishAt) {
+  if (!noMore && dist >= fishAt) {
     fishAt = dist + 26 + Math.random() * 30;
     const fx = (Math.random() * 2 - 1) * (TRACK_HALF - 2);
     for (let i = 0; i < 5; i++) placeItem(makeFishItem(), fx, SPAWN_Z - i * 2.4, 'fish');
   }
-  // 道具
-  if (dist >= itemAt) {
-    itemAt = dist + 130 + Math.random() * 110;
-    const r = Math.random();
-    const type = r < .38 ? 'shield' : r < .7 ? 'magnet' : 'boost';
-    const g = type === 'shield' ? makeShieldItem() : type === 'magnet' ? makeMagnetItem() : makeBoostItem();
-    placeItem(g, (Math.random() * 2 - 1) * (TRACK_HALF - 2), SPAWN_Z, type);
+  // 道具：以 ❓ 驚喜箱為主（吃到隨機開出道具）
+  if (!noMore && dist >= itemAt) {
+    itemAt = dist + 110 + Math.random() * 90;
+    placeItem(makeItemBox(), (Math.random() * 2 - 1) * (TRACK_HALF - 2), SPAWN_Z, 'box');
+  }
+}
+// 驚喜箱獎池（權重）：稀有度仿瑪利歐賽車，星星/子彈最稀有
+const BOX_POOL = [
+  ['shield', 18], ['magnet', 18], ['boost', 14], ['mush', 16], ['bolt', 12], ['star', 12], ['bullet', 10],
+];
+function rollBox() {
+  let t = Math.random() * BOX_POOL.reduce((a, [, w]) => a + w, 0);
+  for (const [type, w] of BOX_POOL) { t -= w; if (t <= 0) return type; }
+  return 'shield';
+}
+function applyPower(type) {
+  if (type === 'shield') {
+    shieldOn = true; shieldBubble.visible = true;
+    showToast('🛡 護盾！'); AudioSys.blip(520, .3, .12, 'triangle');
+  } else if (type === 'magnet') {
+    magnetT = magnetDur;
+    showToast('🧲 磁鐵！'); AudioSys.blip(600, .3, .12, 'triangle');
+  } else if (type === 'boost') {
+    boostT = boostDur;
+    showToast('🚀 衝刺！'); AudioSys.blip(700, .35, .14, 'triangle');
+  } else if (type === 'mush') {
+    dashT = 1.6;
+    showToast('🍄 爆衝！'); AudioSys.blip(760, .3, .14, 'triangle');
+  } else if (type === 'star') {
+    starT = 6;
+    showToast('⭐ 無敵星星！');
+    AudioSys.blip(660, .15, .1, 'triangle'); AudioSys.blip(830, .2, .1, 'triangle'); AudioSys.blip(990, .35, .12, 'triangle');
+  } else if (type === 'bullet') {
+    bulletT = 5;
+    showToast('🎈 子彈企鵝！'); AudioSys.blip(300, .4, .16, 'square');
+  } else if (type === 'bolt') {
+    lightningT = 8;
+    for (const ob of obstacles)  // 全場障礙縮小、可直接輾過
+      if (!ob.ramp && ob.g.scale.x > .5) { ob.g.scale.multiplyScalar(.4); ob.r *= .4; }
+    showToast('⚡ 閃電！'); AudioSys.blip(180, .5, .2, 'square');
   }
 }
 // 開場把整條雪道先鋪滿（障礙＋路旁裝飾），不然要等十幾秒才有東西滑到面前
@@ -683,21 +1028,11 @@ function prefill() {
   }
 }
 grounds.forEach(computeGround);
-prefill();
-if (location.hash.includes('jump')) place(makeRamp(), 0, -60);  // 測試用：正前方跳台
-if (location.hash.includes('items')) {  // 測試用：清空障礙、正前方一排收集物與道具
-  for (const ob of obstacles) world.remove(ob.g);
-  obstacles = [];
-  for (let i = 0; i < 5; i++) placeItem(makeFishItem(), 0, -40 - i * 2.4, 'fish');
-  placeItem(makeShieldItem(), 0, -70, 'shield');
-  placeItem(makeMagnetItem(), 0, -95, 'magnet');
-  placeItem(makeBoostItem(), 0, -120, 'boost');
-}
+prefill();  // 主選單背景先鋪好雪道
 
 // ---------- 輸入 ----------
 function normX(clientX) { return (clientX / innerWidth) * 2 - 1; }
 addEventListener('pointerdown', e => {
-  if (state === 'title') return startGame();
   if (state === 'run') { pointerActive = true; targetX = normX(e.clientX) * TRACK_HALF; }
 });
 addEventListener('pointermove', e => {
@@ -706,10 +1041,7 @@ addEventListener('pointermove', e => {
 addEventListener('pointerup', () => pointerActive = false);
 addEventListener('pointercancel', () => pointerActive = false);
 const keys = {};
-addEventListener('keydown', e => {
-  keys[e.key] = true;
-  if (state === 'title' && (e.key === ' ' || e.key === 'Enter')) startGame();
-});
+addEventListener('keydown', e => keys[e.key] = true);
 addEventListener('keyup', e => keys[e.key] = false);
 
 $('muteBtn').addEventListener('pointerdown', e => e.stopPropagation());
@@ -717,45 +1049,88 @@ $('muteBtn').addEventListener('click', e => {
   e.stopPropagation();
   AudioSys.setMuted(!AudioSys.muted);
   $('muteBtn').textContent = AudioSys.muted ? '🔇' : '🔊';
+  S.muted = AudioSys.muted;
+  save();
 });
 $('retryBtn').addEventListener('pointerdown', e => e.stopPropagation());
-$('retryBtn').addEventListener('click', e => { e.stopPropagation(); resetGame(); });
+$('retryBtn').addEventListener('click', e => { e.stopPropagation(); startRun(mode, curLv); });
 
 // ---------- 流程 ----------
-function startGame() {
-  AudioSys.init();
-  if (AudioSys.ctx && AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume();
-  state = 'run';
-  $('startScreen').style.opacity = 0;
-  setTimeout(() => $('startScreen').style.display = 'none', 500);
-  $('hud').style.opacity = 1;
-}
-function resetGame() {
+function prepareRun() {
   obstacles = []; items = [];
   while (world.children.length) world.remove(world.children[0]);
   trailPts.length = 0; rebuildTrail();
-  dist = 0; speed = 0; px = 0; pvx = 0; py = 0; pvy = 0; grounded = true;
-  targetX = 0; pointerActive = false; speedTier = 0;
-  spawnAt = 30; decorAt = 10; flagAt = 120; fishAt = 40; itemAt = 160;
+  dist = (mode === 'endless' && DEBUG_D) ? DEBUG_D : 0;
+  speed = 0; px = 0; pvx = 0; py = 0; pvy = 0; grounded = true;
+  targetX = 0; pointerActive = false;
+  speedTier = Math.floor(dist / 250);
+  spawnAt = dist + 30; decorAt = dist + 10; flagAt = dist + 120;
+  fishAt = dist + 40; itemAt = dist + 160;
   fishCount = 0; shieldOn = false; magnetT = 0; boostT = 0; invulnT = 0;
+  dashT = 0; starT = 0; bulletT = 0; lightningT = 0; starWas = false;
+  applySkins();
+  finishSpawned = false; diedThisRun = false;
+  runJumps = 0; runSmash = 0; runItems = 0;
+  crashT = 0; penguinFly = null;
   shieldBubble.visible = false;
   $('fishHud').textContent = '🐟 0';
   $('buffs').textContent = '';
-  penguinFly = null;
   grounds[0].position.z = 0; grounds[1].position.z = -GROUND_LEN;
   grounds.forEach(computeGround);
   penguin.position.set(0, 0, 0); penguin.rotation.set(0, Math.PI, 0);
   player.rotation.set(0, 0, 0);
-  setOpacity(mountainBack, 1); setOpacity(cityBack, 0);
+  setOpacity(mountainBack, themeAt(dist - SPAWN_Z) === 0 ? 1 : 0);
+  setOpacity(cityBack, themeAt(dist - SPAWN_Z) === 1 ? 1 : 0);
   prefill();
+  if (mode === 'endless') {  // 測試後門只在無盡模式生效
+    if (DEBUG_JUMP) place(makeRamp(), 0, -60);
+    if (DEBUG_ITEMS) {
+      for (const ob of obstacles) world.remove(ob.g);
+      obstacles = [];
+      for (let i = 0; i < 5; i++) placeItem(makeFishItem(), 0, -40 - i * 2.4, 'fish');
+      placeItem(makeShieldItem(), 0, -70, 'shield');
+      placeItem(makeMagnetItem(), 0, -95, 'magnet');
+      placeItem(makeBoltItem(), 0, -115, 'bolt');
+      placeItem(makeItemBox(), 0, -132, 'box');
+      placeItem(makeMushItem(), 0, -150, 'mush');
+      placeItem(makeStarItem(), 0, -170, 'star');
+      placeItem(makeBulletItem(), 0, -190, 'bullet');
+    }
+  }
+}
+function startRun(m, lv) {
+  mode = m; curLv = lv || 0;
+  lvConf = m === 'level' ? LEVELS[curLv] : null;
+  magnetDur = 8 + S.up.magnet * 1.6;
+  boostDur = 4 + S.up.boost * .8;
+  prepareRun();
+  // 商店升級的開局效果
+  if (Math.random() < [0, .3, .6, 1][S.up.shield]) { shieldOn = true; shieldBubble.visible = true; }
+  const hs = [0, 2, 3, 4][S.up.head];
+  if (hs) { boostT = hs; showToast('🎿 起步衝刺！'); }
+  applyNight(m === 'level' && lvConf.night);
+  AudioSys.init();
+  if (AudioSys.ctx && AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume();
+  ['menu', 'lvSelect', 'shop', 'clearScreen', 'signinBox', 'reviveBox'].forEach(hide);
   $('overScreen').classList.remove('show');
-  $('dist').textContent = '0m';
   $('hud').style.opacity = 1;
   state = 'run';
+}
+function showMenu() {
+  state = 'menu';
+  mode = 'endless'; lvConf = null;
+  applyNight(false);
+  $('hud').style.opacity = 0;
+  $('overScreen').classList.remove('show');
+  ['reviveBox', 'clearScreen', 'lvSelect', 'shop'].forEach(hide);
+  show('menu');
+  renderMenu();
+  checkDaily();
 }
 function crash() {
   state = 'crash';
   crashT = 0;
+  diedThisRun = true;
   AudioSys.crash();
   AudioSys.update(0, 0);
   penguinFly = { vx: pvx * .12, vy: 7.5, vz: 6, rot: (Math.random() - .5) * 10 };
@@ -770,20 +1145,281 @@ function showToast(txt) {
   t.classList.add('show');
   AudioSys.blip(660, .25, .1, 'triangle');
 }
-function showOver() {
+
+// ---- 結算與過關 ----
+function bankRun() {  // 魚入錢包（今日首局雙倍）＋每日任務進度
+  let banked = fishCount;
+  if (fishCount > 0 && S.daily.firstRunDate !== todayStr()) {
+    S.daily.firstRunDate = todayStr();
+    banked = fishCount * 2;
+  }
+  S.fish += banked;
+  for (const task of S.daily.tasks) {
+    if (task.claimed) continue;
+    const def = TASK_POOL.find(d => d.id === task.id);
+    if (!def) continue;
+    if (def.stat === 'maxDist') task.p = Math.max(task.p, Math.floor(dist));
+    else if (def.stat === 'maxFish') task.p = Math.max(task.p, fishCount);
+    else if (def.stat === 'fish') task.p += fishCount;
+    else if (def.stat === 'jumps') task.p += runJumps;
+    else if (def.stat === 'smash') task.p += runSmash;
+    else if (def.stat === 'items') task.p += runItems;
+    else if (def.stat === 'runs') task.p += 1;
+    task.p = Math.min(task.p, def.target);
+  }
+  save();
+  return banked;
+}
+function finishRun() {
   state = 'over';
+  const banked = bankRun();
   const d = Math.floor(dist);
-  const score = d + fishCount * 10;  // 分數 = 距離 + 小魚×10
-  const isBest = score > best;
-  if (isBest) { best = score; localStorage.setItem(BEST_KEY, best); }
-  $('ovDist').textContent = d + 'm';
-  $('ovFish').textContent = fishCount;
-  $('ovScore').textContent = score;
-  $('ovBest').textContent = best;
-  $('newBest').style.visibility = isBest ? 'visible' : 'hidden';
+  if (mode === 'endless') {
+    const score = d + fishCount * 10;
+    const isBest = score > S.best;
+    if (isBest) { S.best = score; save(); }
+    $('overTitle').textContent = '哎呀！';
+    $('ovScore').parentElement.style.display = '';
+    $('ovBest').parentElement.style.display = '';
+    $('ovDist').textContent = d + 'm';
+    $('ovScore').textContent = score;
+    $('ovBest').textContent = S.best;
+    $('newBest').style.visibility = isBest ? 'visible' : 'hidden';
+    $('retryBtn').textContent = '再滑一次';
+  } else {
+    $('overTitle').textContent = '未完成…';
+    $('ovDist').textContent = d + '/' + lvConf.len + 'm';
+    $('ovScore').parentElement.style.display = 'none';
+    $('ovBest').parentElement.style.display = 'none';
+    $('newBest').style.visibility = 'hidden';
+    $('retryBtn').textContent = '再試一次';
+  }
+  $('ovFish').textContent = banked > fishCount ? `${fishCount} ×2 = ${banked} 🎉` : fishCount;
   $('hud').style.opacity = 0;
   $('overScreen').classList.add('show');
 }
+function levelClear() {
+  state = 'clear';
+  AudioSys.blip(660, .25, .14, 'triangle');
+  AudioSys.blip(880, .5, .14, 'triangle');
+  burstPuffs(px, terrainH(dist) + 1, 0, 16, 6);
+  const stars = 1 + (fishCount >= lvConf.fishGoal ? 1 : 0) + (diedThisRun ? 0 : 1);
+  S.stars[curLv] = Math.max(S.stars[curLv] || 0, stars);
+  S.unlocked = Math.max(S.unlocked, Math.min(curLv + 2, LEVELS.length));
+  const bonus = 100 + curLv * 50;
+  const banked = bankRun();
+  S.fish += bonus;
+  save();
+  $('clearTitle').textContent = `第 ${curLv + 1} 關 過關！`;
+  $('clearStars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+  $('clFish').textContent = (banked > fishCount ? `${fishCount} ×2！` : fishCount) +
+    (fishCount >= lvConf.fishGoal ? '（達標 ★）' : '／目標 ' + lvConf.fishGoal);
+  $('clBonus').textContent = bonus;
+  $('clTotal').textContent = (banked + bonus) + ' 🐟';
+  $('clNext').style.display = curLv + 1 < LEVELS.length ? '' : 'none';
+  $('hud').style.opacity = 0;
+  show('clearScreen');
+}
+
+// ---- 復活 ----
+let revTimer = null, revLeft = 5;
+function showRevive() {
+  state = 'revive';
+  revLeft = 5;
+  $('revCount').textContent = revLeft;
+  $('revTicket').textContent = `❤️ 用復活券（剩 ${S.tickets}）`;
+  $('revTicket').style.display = S.tickets > 0 ? '' : 'none';
+  $('revFish').textContent = `🐟 ${REVIVE_FISH} 復活（錢包 ${S.fish}）`;
+  $('revFish').style.display = S.fish >= REVIVE_FISH ? '' : 'none';
+  show('reviveBox');
+  revTimer = setInterval(() => {
+    revLeft--;
+    $('revCount').textContent = revLeft;
+    if (revLeft <= 0) { clearInterval(revTimer); giveUp(); }
+  }, 1000);
+}
+function doRevive(useTicket) {
+  if (useTicket) { if (S.tickets <= 0) return; S.tickets--; }
+  else { if (S.fish < REVIVE_FISH) return; S.fish -= REVIVE_FISH; }
+  clearInterval(revTimer);
+  save();
+  for (let i = obstacles.length - 1; i >= 0; i--) {  // 清掉眼前障礙避免秒死
+    if (obstacles[i].g.position.z > -30 && !obstacles[i].ramp) {
+      world.remove(obstacles[i].g);
+      obstacles.splice(i, 1);
+    }
+  }
+  penguinFly = null;
+  penguin.position.set(0, 0, 0); penguin.rotation.set(0, Math.PI, 0);
+  py = 0; pvy = 0; pvx = 0; grounded = true; invulnT = 2;
+  hide('reviveBox');
+  state = 'run';
+}
+function giveUp() {
+  clearInterval(revTimer);
+  hide('reviveBox');
+  finishRun();
+}
+$('revTicket').onclick = () => doRevive(true);
+$('revFish').onclick = () => doRevive(false);
+$('revGiveup').onclick = giveUp;
+
+// ---- 每日簽到與任務 ----
+function todayStr() { return new Date().toDateString(); }
+function checkDaily() {
+  const today = todayStr();
+  if (S.daily.tDate !== today) {  // 換日抽 3 則任務
+    S.daily.tDate = today;
+    const seed = [...today].reduce((a, c) => a + c.charCodeAt(0), 0);
+    const pool = [...TASK_POOL];
+    S.daily.tasks = [];
+    for (let i = 0; i < 3; i++) {
+      const k = (seed * (i + 3) + i * 7) % pool.length;
+      S.daily.tasks.push({ id: pool.splice(k, 1)[0].id, p: 0, claimed: false });
+    }
+    save();
+    renderTasks();
+  }
+  if (S.daily.last !== today) showSignin();
+}
+function showSignin() {
+  const today = todayStr();
+  const yest = new Date(Date.now() - 864e5).toDateString();
+  const newStreak = S.daily.last === yest ? S.daily.streak + 1 : 1;
+  const idx = (newStreak - 1) % 7;
+  $('signinStreak').textContent = `連續登入第 ${newStreak} 天`;
+  $('signinDays').innerHTML = SIGNIN_REWARDS.map((r, i) =>
+    `<div class="dayChip ${i < idx ? 'got' : i === idx ? 'today' : ''}">D${i + 1}<b>${r}</b></div>`).join('');
+  $('signinClaim').textContent = `領取 ${SIGNIN_REWARDS[idx]} 🐟`;
+  $('signinClaim').onclick = () => {
+    S.daily.last = today;
+    S.daily.streak = newStreak;
+    S.fish += SIGNIN_REWARDS[idx];
+    save();
+    hide('signinBox');
+    renderMenu();
+    showToast(`+${SIGNIN_REWARDS[idx]} 🐟`);
+  };
+  show('signinBox');
+}
+function renderTasks() {
+  $('taskList').innerHTML = S.daily.tasks.map((t, i) => {
+    const def = TASK_POOL.find(d => d.id === t.id);
+    const pct = Math.min(100, t.p / def.target * 100);
+    const done = t.p >= def.target;
+    return `<div class="taskRow"><span class="tn">${def.name}</span>
+      <span class="bar"><i style="width:${pct}%"></i></span>
+      <button class="claimBtn" data-task="${i}" ${done && !t.claimed ? '' : 'disabled'}>${t.claimed ? '已領' : done ? '領 ' + TASK_REWARD : t.p + '/' + def.target}</button></div>`;
+  }).join('');
+}
+$('taskList').addEventListener('click', e => {
+  const i = e.target.dataset.task;
+  if (i === undefined) return;
+  const t = S.daily.tasks[i];
+  const def = TASK_POOL.find(d => d.id === t.id);
+  if (!t || t.claimed || t.p < def.target) return;
+  t.claimed = true;
+  S.fish += TASK_REWARD;
+  save();
+  renderMenu();
+  showToast(`+${TASK_REWARD} 🐟`);
+});
+
+// ---- 主選單／選關／商店 ----
+function renderMenu() {
+  $('mFish').textContent = '🐟 ' + S.fish;
+  $('mTicket').textContent = '❤️ ' + S.tickets;
+  const allClear = LEVELS.every((_, i) => S.stars[i]);
+  $('lvHint').textContent = allClear ? '全部通關！' : `第 ${Math.min(S.unlocked, LEVELS.length)} 關`;
+  $('bestHint').textContent = `最佳 ${S.best} 分`;
+  renderTasks();
+}
+function renderLevels() {
+  $('lvGrid').innerHTML = LEVELS.map((lv, i) => {
+    const locked = i + 1 > S.unlocked;
+    const st = S.stars[i] || 0;
+    return `<button class="lvNode ${locked ? 'lock' : ''}" data-lv="${i}" ${locked ? 'disabled' : ''}>
+      <div class="n">${locked ? '🔒' : i + 1}</div>
+      <div class="len">${lv.len}m${lv.night ? '・夜' : ''}${lv.theme === 1 ? '・城' : '・山'}</div>
+      <div class="st">${'★'.repeat(st)}${'☆'.repeat(3 - st)}</div></button>`;
+  }).join('');
+}
+let shopTab = 'up';
+function renderShop() {
+  $('sFish').textContent = '🐟 ' + S.fish;
+  const el = $('shopList');
+  if (shopTab === 'up') {
+    el.innerHTML = Object.entries(UPGRADES).map(([k, u]) => {
+      const lv = S.up[k], maxed = lv >= u.max;
+      return `<div class="shopRow"><span class="ic">${u.icon}</span>
+        <span class="info"><div class="nm">${u.name}　Lv${lv}${maxed ? '（滿級）' : ''}</div>
+        <div class="ds">${u.desc(lv)}${maxed ? '' : '　→　' + u.desc(lv + 1)}</div></span>
+        <button class="buyBtn" data-up="${k}" ${maxed || S.fish < u.price[lv] ? 'disabled' : ''}>${maxed ? 'MAX' : '🐟 ' + u.price[lv]}</button></div>`;
+    }).join('');
+  } else if (shopTab === 'skin') {
+    const row = (sk, kind) => {
+      const ownedArr = kind === 'peng' ? S.skins.peng : S.skins.sled;
+      const owned = ownedArr.includes(sk.id);
+      const eq = (kind === 'peng' ? S.skins.eqPeng : S.skins.eqSled) === sk.id;
+      const col = '#' + (sk.body ?? sk.c1).toString(16).padStart(6, '0');
+      return `<div class="shopRow"><span class="dot" style="background:${col}"></span>
+        <span class="info"><div class="nm">${sk.name}</div><div class="ds">${kind === 'peng' ? '企鵝皮膚' : '雪橇皮膚'}</div></span>
+        <button class="buyBtn ${eq ? 'eq' : ''}" data-skin="${kind}:${sk.id}" ${!owned && S.fish < sk.price ? 'disabled' : ''}>${eq ? '使用中' : owned ? '裝備' : '🐟 ' + sk.price}</button></div>`;
+    };
+    el.innerHTML = PENG_SKINS.map(s => row(s, 'peng')).join('') + SLED_SKINS.map(s => row(s, 'sled')).join('');
+  } else {
+    el.innerHTML = `<div class="shopRow"><span class="ic">❤️</span>
+      <span class="info"><div class="nm">復活券（持有 ${S.tickets}）</div><div class="ds">死亡時免費原地復活一次</div></span>
+      <button class="buyBtn" data-buy="ticket" ${S.fish < TICKET_PRICE ? 'disabled' : ''}>🐟 ${TICKET_PRICE}</button></div>`;
+  }
+}
+$('shopList').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b || b.disabled) return;
+  if (b.dataset.up) {
+    const k = b.dataset.up, u = UPGRADES[k];
+    if (S.up[k] < u.max && S.fish >= u.price[S.up[k]]) {
+      S.fish -= u.price[S.up[k]];
+      S.up[k]++;
+      AudioSys.blip(700, .2, .1, 'triangle');
+    }
+  } else if (b.dataset.skin) {
+    const [kind, id] = b.dataset.skin.split(':');
+    const sk = (kind === 'peng' ? PENG_SKINS : SLED_SKINS).find(s => s.id === id);
+    const ownedArr = kind === 'peng' ? S.skins.peng : S.skins.sled;
+    if (!ownedArr.includes(id)) {
+      if (S.fish < sk.price) return;
+      S.fish -= sk.price;
+      ownedArr.push(id);
+    }
+    if (kind === 'peng') S.skins.eqPeng = id; else S.skins.eqSled = id;
+    applySkins();
+    AudioSys.blip(760, .2, .1, 'triangle');
+  } else if (b.dataset.buy === 'ticket') {
+    S.fish -= TICKET_PRICE;
+    S.tickets++;
+    AudioSys.blip(700, .2, .1, 'triangle');
+  } else return;
+  save();
+  renderShop();
+});
+document.querySelectorAll('.tabBtn').forEach(b => b.addEventListener('click', () => {
+  shopTab = b.dataset.tab;
+  document.querySelectorAll('.tabBtn').forEach(x => x.classList.toggle('on', x === b));
+  renderShop();
+}));
+$('lvGrid').addEventListener('click', e => {
+  const n = e.target.closest('.lvNode');
+  if (!n || n.disabled) return;
+  startRun('level', +n.dataset.lv);
+});
+$('btnLevel').onclick = () => { renderLevels(); show('lvSelect'); };
+$('btnEndless').onclick = () => startRun('endless', 0);
+$('btnShop').onclick = () => { renderShop(); show('shop'); };
+document.querySelectorAll('.backBtn').forEach(b => b.onclick = () => { hide(b.dataset.back); renderMenu(); });
+$('clNext').onclick = () => startRun('level', Math.min(curLv + 1, LEVELS.length - 1));
+$('clMenu').onclick = showMenu;
+$('ovMenu').onclick = showMenu;
 
 // ---------- 主迴圈 ----------
 let lastT = performance.now(), trailAcc = 0;
@@ -798,18 +1434,35 @@ function tick(now) {
       magnetT = Math.max(0, magnetT - dt);
       boostT = Math.max(0, boostT - dt);
       invulnT = Math.max(0, invulnT - dt);
-      // 底速漸進 16→40，下坡再加速、上坡減速（最高 46；衝刺再 ×1.35）
-      const baseSpd = Math.min(40, 16 + dist * .03);
-      const boostMul = boostT > 0 ? 1.35 : 1;
-      const targetSpd = THREE.MathUtils.clamp(baseSpd * (1 - terrainSlope(dist) * 2.4) * boostMul, 13, 52);
+      dashT = Math.max(0, dashT - dt);
+      starT = Math.max(0, starT - dt);
+      bulletT = Math.max(0, bulletT - dt);
+      lightningT = Math.max(0, lightningT - dt);
+      // 底速漸進 16→40，下坡再加速、上坡減速；道具加成擇強生效
+      const baseSpd = Math.min(40, 16 + dist * .03) * (mode === 'level' ? lvConf.spd : 1);
+      const boostMul = dashT > 0 ? 1.9 : bulletT > 0 ? 1.8 : starT > 0 ? 1.5 : boostT > 0 ? 1.35 : 1;
+      const capSpd = (dashT > 0 || bulletT > 0 || starT > 0) ? 60 : 52;
+      const targetSpd = THREE.MathUtils.clamp(baseSpd * (1 - terrainSlope(dist) * 2.4) * boostMul, 13, capSpd);
       speed += (targetSpd - speed) * Math.min(dt * 1.8, 1);
       dist += speed * dt;
-      $('dist').textContent = Math.floor(dist) + 'm';
+      $('dist').textContent = mode === 'level'
+        ? Math.floor(Math.min(dist, lvConf.len)) + '/' + lvConf.len + 'm'
+        : Math.floor(dist) + 'm';
+      if (mode === 'level' && dist >= lvConf.len) { levelClear(); }
       const tier = Math.floor(dist / 250);
       if (tier > speedTier) { speedTier = tier; showToast('加速！'); }
 
-      // 鍵盤轉向
-      if (keys.ArrowLeft || keys.a || keys.A) { targetX = px - 5; pointerActive = false; }
+      // 轉向（子彈企鵝＝自動駕駛追最近的魚）
+      if (bulletT > 0) {
+        pointerActive = false;
+        let bx = 0, bd = 1e9;
+        for (const it of items) {
+          if (it.type !== 'fish') continue;
+          const z = it.g.position.z;
+          if (z > -70 && z < -4 && -z < bd) { bd = -z; bx = it.g.position.x; }
+        }
+        targetX = bx;
+      } else if (keys.ArrowLeft || keys.a || keys.A) { targetX = px - 5; pointerActive = false; }
       else if (keys.ArrowRight || keys.d || keys.D) { targetX = px + 5; pointerActive = false; }
       else if (!pointerActive) targetX = px;
 
@@ -831,8 +1484,8 @@ function tick(now) {
         spawnPuff(px - Math.sign(pvx) * .7, terrainH(dist) + .15, .4,
           -pvx * .18, 1.5 + Math.random() * 2, 1.5, .5 + Math.random() * .5);
 
-      // 磁鐵吸附小魚
-      if (magnetT > 0) {
+      // 磁鐵吸附小魚（星星與子彈期間也自帶吸力）
+      if (magnetT > 0 || starT > 0 || bulletT > 0) {
         const gy0 = terrainH(dist);
         for (const it of items) {
           if (it.type !== 'fish') continue;
@@ -861,15 +1514,9 @@ function tick(now) {
               $('fishHud').textContent = '🐟 ' + fishCount;
               AudioSys.blip(880 + (fishCount % 5) * 60, .12, .08, 'triangle');
               spawnPuff(ox, it.g.position.y, oz, 0, 2, 1, .45);
-            } else if (it.type === 'shield') {
-              shieldOn = true; shieldBubble.visible = true;
-              showToast('🛡 護盾！'); AudioSys.blip(520, .3, .12, 'triangle');
-            } else if (it.type === 'magnet') {
-              magnetT = 8;
-              showToast('🧲 磁鐵！'); AudioSys.blip(600, .3, .12, 'triangle');
             } else {
-              boostT = 4;
-              showToast('🚀 衝刺！'); AudioSys.blip(700, .35, .14, 'triangle');
+              runItems++;
+              applyPower(it.type === 'box' ? rollBox() : it.type);
             }
           }
         }
@@ -880,6 +1527,9 @@ function tick(now) {
         shieldOn ? '🛡' : null,
         magnetT > 0 ? '🧲' + Math.ceil(magnetT) : null,
         boostT > 0 ? '🚀' + Math.ceil(boostT) : null,
+        starT > 0 ? '⭐' + Math.ceil(starT) : null,
+        bulletT > 0 ? '🎈' + Math.ceil(bulletT) : null,
+        lightningT > 0 ? '⚡' + Math.ceil(lightningT) : null,
       ].filter(Boolean).join('　');
 
       spawnStep();
@@ -904,7 +1554,10 @@ function tick(now) {
           penguin.position.y = .1; penguinFly.vy = 0; penguinFly.vz *= .6; penguinFly.rot *= .5;
         }
       }
-      if (crashT > 1) showOver();
+      if (crashT > 1) {
+        if (S.tickets > 0 || S.fish >= REVIVE_FISH) showRevive();
+        else finishRun();
+      }
     }
 
     // 世界前進
@@ -941,9 +1594,9 @@ function tick(now) {
         const oz = ob.g.position.z, ox = ob.g.position.x;
         if (oz > -1.4 && oz < 1.4 && Math.abs(px - ox) < ob.r + .62) {
           if (ob.ramp) {
-            if (grounded) { grounded = false; pvy = 8.5 + speed * .12; AudioSys.jump(); }
+            if (grounded) { grounded = false; pvy = 8.5 + speed * .12; runJumps++; AudioSys.jump(); }
           } else if (py < 1.1 && invulnT <= 0) {
-            if (boostT > 0) toSmash.push(ob);
+            if (boostT > 0 || dashT > 0 || starT > 0 || bulletT > 0 || lightningT > 0) toSmash.push(ob);
             else if (shieldOn) {
               shieldOn = false; shieldBubble.visible = false; invulnT = 1;
               toSmash.push(ob);
@@ -952,6 +1605,7 @@ function tick(now) {
           }
         }
       }
+      runSmash += toSmash.length;
       for (const ob of toSmash) {
         const k = obstacles.indexOf(ob);
         if (k >= 0) obstacles.splice(k, 1);
@@ -973,10 +1627,16 @@ function tick(now) {
     AudioSys.update(speed, state === 'run' ? pvx : 0);
   }
 
+  // 無敵星星：企鵝彩虹閃爍
+  if (starT > 0) {
+    pengBodyMat.color.setHSL((now * .0015) % 1, .85, .55);
+    starWas = true;
+  } else if (starWas) { starWas = false; applySkins(); }
+
   // 玩家姿態（貼合坡面、上下坡俯仰）
   const gy = terrainH(dist);
   player.position.set(px, gy + py, 0);
-  if (state === 'run' || state === 'title') {
+  if (state === 'run' || state === 'menu') {
     const lean = THREE.MathUtils.clamp(pvx * .045, -.6, .6);
     player.rotation.y = -lean * .9;
     player.rotation.z = -lean * .55;
@@ -1008,6 +1668,16 @@ function tick(now) {
   renderer.render(scene, camera);
 }
 requestAnimationFrame(tick);
+
+// ---------- 初始化 ----------
+AudioSys.muted = !!S.muted;
+$('muteBtn').textContent = AudioSys.muted ? '🔇' : '🔊';
+applySkins();
+renderMenu();
+checkDaily();
+if ('serviceWorker' in navigator && location.protocol === 'https:')
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+if (DEBUG_D || DEBUG_ITEMS || RAMP_BOOST || DEBUG_JUMP) startRun('endless', 0);  // 測試後門直接開跑
 
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
