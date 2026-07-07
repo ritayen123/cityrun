@@ -19,6 +19,17 @@
     user-select: none; -webkit-user-select: none; }
   canvas { display: block; }
   #ui { position: fixed; inset: 0; pointer-events: none; }
+  #vig { position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 42%, transparent 62%, rgba(90,120,160,.18) 100%); }
+  .sline { position: fixed; top: 0; width: 12%; height: 100%; pointer-events: none; opacity: 0;
+    transition: opacity .5s;
+    background: repeating-linear-gradient(180deg, transparent 0 30px, rgba(255,255,255,.55) 30px 36px); }
+  #slL { left: 0; -webkit-mask-image: linear-gradient(90deg, #000, transparent);
+    mask-image: linear-gradient(90deg, #000, transparent); }
+  #slR { right: 0; -webkit-mask-image: linear-gradient(270deg, #000, transparent);
+    mask-image: linear-gradient(270deg, #000, transparent); }
+  .sline.on { opacity: .5; animation: slm .22s linear infinite; }
+  @keyframes slm { from { background-position-y: 0; } to { background-position-y: 66px; } }
 
   /* HUD */
   #hud { position: absolute; top: env(safe-area-inset-top, 0); left: 0; right: 0; padding-top: 18px;
@@ -169,6 +180,9 @@
 </head>
 <body>
 <div id="ui">
+  <div id="vig"></div>
+  <div id="slL" class="sline"></div>
+  <div id="slR" class="sline"></div>
   <div id="hud"><div id="dist">0m</div><div id="lvBarWrap"><i id="lvBar"></i></div><div id="fishHud">🐟 0</div><div id="buffs"></div></div>
   <div id="toast"></div>
   <div id="tutHint">👆 按住拖曳，左右閃避障礙</div>
@@ -299,6 +313,7 @@ function makeSky(top, mid, bot) {
   return tex;
 }
 const skyDay = makeSky('#a9cdea', '#cbe1f2', '#eef5fb');
+const skyDusk = makeSky('#7f89c2', '#f2a17c', '#fbe3c9');
 const skyNight = makeSky('#1e2c47', '#35496b', '#5b6f92');
 scene.background = skyDay;
 
@@ -356,13 +371,22 @@ const grounds = [0, 1].map(i => {
   return p;
 });
 const groundMats = grounds.map(g => g.material);
-// 夜間關卡配色切換
-function applyNight(on) {
-  scene.background = on ? skyNight : skyDay;
-  scene.fog.color.setHex(on ? 0x3a4a63 : 0xdfe9f5);
-  hemi.intensity = on ? .55 : .95;
-  sun.intensity = on ? .35 : .85;
-  groundMats.forEach(m => m.color.setHex(on ? 0xc9d4e8 : 0xf5f9fd));
+// 日／黃昏／夜三套色調
+const PALS = {
+  day:   { sky: skyDay,   fog: 0xdfe9f5, hemi: .95, sun: .85, sunC: 0xfff4e0, ground: 0xf5f9fd },
+  dusk:  { sky: skyDusk,  fog: 0xe8c0a4, hemi: .8,  sun: .9,  sunC: 0xffc890, ground: 0xf5e9dd },
+  night: { sky: skyNight, fog: 0x3a4a63, hemi: .55, sun: .35, sunC: 0xbcd0ff, ground: 0xc9d4e8 },
+};
+function applyPalette(pal) {
+  const p = PALS[pal] || PALS.day;
+  scene.background = p.sky;
+  scene.fog.color.setHex(p.fog);
+  hemi.intensity = p.hemi;
+  sun.intensity = p.sun;
+  sun.color.setHex(p.sunC);
+  groundMats.forEach(m => m.color.setHex(p.ground));
+  auroraGroup.visible = pal === 'night';
+  skyDeco.visible = pal !== 'night';
 }
 // 依滑道座標把地面頂點抬成坡面（換段接力時重算一次即可）
 function computeGround(p) {
@@ -419,6 +443,59 @@ const cityBack = new THREE.Group();
 }
 scene.add(cityBack);
 setOpacity(cityBack, 0);
+
+// 天空裝飾：太陽＋飄雲（日/黃昏）
+function radialTex(inner, outer) {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 6, 64, 64, 62);
+  gr.addColorStop(0, inner); gr.addColorStop(1, outer);
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+  return t;
+}
+const skyDeco = new THREE.Group();
+const clouds = [];
+{
+  const sunM = new THREE.Mesh(new THREE.PlaneGeometry(26, 26),
+    new THREE.MeshBasicMaterial({ map: radialTex('rgba(255,250,225,.95)', 'rgba(255,250,225,0)'),
+      transparent: true, depthWrite: false, fog: false }));
+  sunM.position.set(-52, 52, -186);
+  skyDeco.add(sunM);
+  const cloudTex = radialTex('rgba(255,255,255,.85)', 'rgba(255,255,255,0)');
+  [[-70, 46, 34], [-10, 55, 46], [55, 42, 28], [95, 50, 38]].forEach(([x, y, w]) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, w * .38),
+      new THREE.MeshBasicMaterial({ map: cloudTex, transparent: true, opacity: .8, depthWrite: false, fog: false }));
+    m.position.set(x, y, -182);
+    skyDeco.add(m);
+    clouds.push(m);
+  });
+}
+scene.add(skyDeco);
+
+// 極光（夜間關）
+const auroraGroup = new THREE.Group();
+{
+  const c = document.createElement('canvas'); c.width = 64; c.height = 128;
+  const g = c.getContext('2d');
+  const gr = g.createLinearGradient(0, 0, 0, 128);
+  gr.addColorStop(0, 'rgba(120,255,200,0)');
+  gr.addColorStop(.35, 'rgba(120,255,200,.55)');
+  gr.addColorStop(.7, 'rgba(150,130,255,.35)');
+  gr.addColorStop(1, 'rgba(150,130,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 128);
+  const tex = new THREE.CanvasTexture(c);
+  for (let i = 0; i < 3; i++) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(82, 24),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: .32,
+        blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+    m.position.set(-38 + i * 38, 36 + i * 5, -174 - i * 6);
+    m.rotation.z = (i - 1) * .12;
+    auroraGroup.add(m);
+  }
+  auroraGroup.visible = false;
+}
+scene.add(auroraGroup);
 
 // ---------- 程序化小物件工廠 ----------
 function makeSnowTree() {
@@ -525,6 +602,18 @@ function makePole() {
   g.userData.r = .55;
   return g;
 }
+function makeSnowman() {  // 左右滑動的雪人障礙
+  const g = new THREE.Group();
+  mesh(new THREE.SphereGeometry(.58, 10, 8), mat(0xf7fafc, { flatShading: true }), 0, .5, 0, g);
+  mesh(new THREE.SphereGeometry(.4, 10, 8), mat(0xffffff, { flatShading: true }), 0, 1.18, 0, g);
+  mesh(new THREE.ConeGeometry(.08, .32, 6), mat(0xf2a03d), 0, 1.2, .4, g).rotation.x = Math.PI / 2;
+  [-1, 1].forEach(s => mesh(new THREE.SphereGeometry(.05, 6, 5), mat(0x23262b), s * .13, 1.28, .32, g));
+  mesh(new THREE.CylinderGeometry(.2, .24, .26, 8), mat(0x23262b), 0, 1.56, 0, g);
+  mesh(new THREE.CylinderGeometry(.3, .3, .05, 8), mat(0x23262b), 0, 1.44, 0, g);
+  g.userData.r = .95;
+  g.userData.mover = true;
+  return g;
+}
 function makeFinishGate() {
   const g = new THREE.Group();
   [-8.5, 8.5].forEach(x =>
@@ -583,6 +672,37 @@ const penguin = new THREE.Group();
     mesh(new THREE.BoxGeometry(.2, .07, .34), mat(0xf2a03d), s * .2, .2, .32, penguin).rotation.y = s * .18;
   });
 }
+// 圍巾（顏色隨皮膚）＋帽子配件（依皮膚顯示）
+const scarfMat = new THREE.MeshLambertMaterial({ color: 0xd84848 });
+{
+  const sc = mesh(new THREE.TorusGeometry(.34, .09, 8, 14), scarfMat, 0, .86, 0, penguin);
+  sc.rotation.x = Math.PI / 2;
+  const tail = mesh(new THREE.BoxGeometry(.16, .36, .06), scarfMat, .17, .6, -.36, penguin);
+  tail.rotation.x = .35;
+}
+const hatBand = new THREE.Group();  // 忍者頭帶
+{
+  const b = mesh(new THREE.TorusGeometry(.44, .06, 6, 14), mat(0x3a3f47), 0, .9, 0, hatBand);
+  b.rotation.x = Math.PI / 2 - .12;
+  [-1, 1].forEach(s => mesh(new THREE.BoxGeometry(.08, .3, .03), mat(0x3a3f47), s * .1, .72, -.44, hatBand)
+    .rotation.x = .4);
+}
+const hatBeanie = new THREE.Group();  // 聖誕帽
+{
+  mesh(new THREE.ConeGeometry(.34, .5, 10), mat(0xd84848, { flatShading: true }), 0, 1.22, 0, hatBeanie)
+    .rotation.z = .18;
+  const brim = mesh(new THREE.TorusGeometry(.32, .08, 8, 14), mat(0xffffff), 0, 1.02, 0, hatBeanie);
+  brim.rotation.x = Math.PI / 2;
+  mesh(new THREE.SphereGeometry(.1, 8, 6), mat(0xffffff), .1, 1.5, 0, hatBeanie);
+}
+const hatCrown = new THREE.Group();  // 黃金皇冠
+{
+  mesh(new THREE.CylinderGeometry(.26, .3, .18, 10), mat(0xf0c02e, { flatShading: true }), 0, 1.1, 0, hatCrown);
+  [0, 2.1, 4.2].forEach(a =>
+    mesh(new THREE.ConeGeometry(.06, .16, 6), mat(0xf0c02e), Math.cos(a) * .22, 1.26, Math.sin(a) * .22, hatCrown));
+}
+hatBand.visible = hatBeanie.visible = hatCrown.visible = false;
+penguin.add(hatBand, hatBeanie, hatCrown);
 penguin.rotation.y = Math.PI;  // 背對鏡頭、面向前方（同範例視角）
 player.add(penguin);
 // 護盾泡泡
@@ -744,6 +864,36 @@ function makeBoltItem() {
   mesh(geo, mat(0xffe14a, { flatShading: true, emissive: 0x8a7a10 }), 0, 0, -.06, g);
   return g;
 }
+function makeSlowItem() {  // 沙漏：緩速
+  const g = new THREE.Group();
+  mesh(new THREE.ConeGeometry(.3, .34, 8), mat(0x63c8f0), 0, .17, 0, g).rotation.x = Math.PI;
+  mesh(new THREE.ConeGeometry(.3, .34, 8), mat(0x63c8f0), 0, -.17, 0, g);
+  mesh(new THREE.CylinderGeometry(.34, .34, .06, 8), mat(0x8a6742), 0, .37, 0, g);
+  mesh(new THREE.CylinderGeometry(.34, .34, .06, 8), mat(0x8a6742), 0, -.37, 0, g);
+  return g;
+}
+function makeGhostItem() {  // 幽靈：穿透
+  const g = new THREE.Group();
+  mesh(new THREE.SphereGeometry(.38, 10, 8),
+    new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: .65 }), 0, .05, 0, g)
+    .scale.set(1, 1.15, 1);
+  [-1, 1].forEach(s => mesh(new THREE.SphereGeometry(.06, 6, 5), mat(0x23262b), s * .13, .15, .3, g));
+  return g;
+}
+function makeRainItem() {  // 雲＋魚：魚雨
+  const g = new THREE.Group();
+  [[-.22, 0], [0, .1], [.22, 0]].forEach(([x, y]) =>
+    mesh(new THREE.SphereGeometry(.22, 8, 6), mat(0xffffff), x, .25 + y, 0, g));
+  mesh(new THREE.SphereGeometry(.14, 8, 6), mat(0xf7b733), 0, -.15, 0, g).scale.set(1.3, .7, .5);
+  return g;
+}
+function makeX2Item() {  // 金鈴鐺：小魚雙倍
+  const g = new THREE.Group();
+  mesh(new THREE.CylinderGeometry(.08, .34, .4, 10), mat(0xf0c02e, { flatShading: true }), 0, .05, 0, g);
+  mesh(new THREE.SphereGeometry(.09, 8, 6), mat(0xf0c02e), 0, .3, 0, g);
+  mesh(new THREE.SphereGeometry(.08, 8, 6), mat(0x8a6742), 0, -.2, 0, g);
+  return g;
+}
 
 // ---------- 雪花噴濺粒子池 ----------
 const puffs = [];
@@ -839,30 +989,44 @@ const UPGRADES = {
   head:   { icon: '🎿', name: '起步衝刺', max: 3, price: [150, 450, 900], desc: l => `開場自動衝刺 ${[0, 2, 3, 4][l]} 秒` },
 };
 const PENG_SKINS = [
-  { id: 'classic', name: '小黑', body: 0x23262b, belly: 0xf7fafc, price: 0 },
-  { id: 'blue',    name: '藍莓', body: 0x3d5a8f, belly: 0xe8f1fb, price: 300 },
-  { id: 'pink',    name: '櫻花', body: 0xd77fa3, belly: 0xfff0f5, price: 300 },
-  { id: 'mint',    name: '薄荷', body: 0x4aa89a, belly: 0xeafff8, price: 600 },
-  { id: 'gold',    name: '黃金', body: 0xd9a92e, belly: 0xfff3c8, price: 1500 },
+  { id: 'classic', name: '小黑', body: 0x23262b, belly: 0xf7fafc, scarf: 0xd84848, price: 0 },
+  { id: 'blue',    name: '藍莓', body: 0x3d5a8f, belly: 0xe8f1fb, scarf: 0xf0a132, price: 300 },
+  { id: 'pink',    name: '櫻花', body: 0xd77fa3, belly: 0xfff0f5, scarf: 0x8e5bd1, price: 300 },
+  { id: 'mint',    name: '薄荷', body: 0x4aa89a, belly: 0xeafff8, scarf: 0xd84848, price: 600 },
+  { id: 'ninja',   name: '忍者', body: 0x2b2f36, belly: 0x4a515c, scarf: 0x1e2126, hat: 'band', price: 800 },
+  { id: 'santa',   name: '聖誕', body: 0x23262b, belly: 0xf7fafc, scarf: 0x4aa860, hat: 'beanie', price: 1000 },
+  { id: 'gold',    name: '黃金', body: 0xd9a92e, belly: 0xfff3c8, scarf: 0xffffff, hat: 'crown', price: 1500 },
 ];
 const SLED_SKINS = [
   { id: 'blue',   name: '經典藍', c1: 0x3f76d8, c2: 0x5b8de4, price: 0 },
   { id: 'red',    name: '火焰紅', c1: 0xd84848, c2: 0xe86a6a, price: 250 },
   { id: 'green',  name: '青蘋果', c1: 0x4aa860, c2: 0x6cc481, price: 250 },
   { id: 'purple', name: '葡萄紫', c1: 0x8e5bd1, c2: 0xa87ce0, price: 500 },
+  { id: 'ice',    name: '冰晶',   c1: 0xa8d8f0, c2: 0xdff0fb, price: 800 },
+  { id: 'candy',  name: '糖果',   c1: 0xe84a8a, c2: 0x63c8f0, price: 1200 },
   { id: 'gold',   name: '黃金',   c1: 0xd9a92e, c2: 0xf0c65a, price: 1200 },
 ];
 const LEVELS = [
-  { len: 500,  theme: 0, night: false, spd: .85, dens: .75, fishGoal: 18 },
-  { len: 650,  theme: 1, night: false, spd: .9,  dens: .85, fishGoal: 25 },
-  { len: 800,  theme: 0, night: false, spd: .95, dens: .95, fishGoal: 32 },
-  { len: 950,  theme: 1, night: true,  spd: 1,   dens: 1,   fishGoal: 40 },
-  { len: 1100, theme: 0, night: true,  spd: 1.05, dens: 1.05, fishGoal: 48 },
-  { len: 1300, theme: 1, night: false, spd: 1.1, dens: 1.15, fishGoal: 56 },
-  { len: 1500, theme: 0, night: false, spd: 1.15, dens: 1.25, fishGoal: 65 },
-  { len: 1700, theme: 1, night: true,  spd: 1.2, dens: 1.35, fishGoal: 75 },
-  { len: 1900, theme: 0, night: true,  spd: 1.25, dens: 1.45, fishGoal: 85 },
-  { len: 2200, theme: 1, night: true,  spd: 1.3, dens: 1.55, fishGoal: 100 },
+  { len: 500,  theme: 0, pal: 'day',   spd: .85,  dens: .75, fishGoal: 18 },
+  { len: 650,  theme: 1, pal: 'day',   spd: .9,   dens: .85, fishGoal: 25 },
+  { len: 800,  theme: 0, pal: 'day',   spd: .95,  dens: .95, fishGoal: 32 },
+  { len: 950,  theme: 1, pal: 'night', spd: 1,    dens: 1,   fishGoal: 40 },
+  { len: 1100, theme: 0, pal: 'night', spd: 1.05, dens: 1.05, fishGoal: 48 },
+  { len: 1300, theme: 1, pal: 'day',   spd: 1.1,  dens: 1.15, fishGoal: 56 },
+  { len: 1500, theme: 0, pal: 'day',   spd: 1.15, dens: 1.25, fishGoal: 65 },
+  { len: 1700, theme: 1, pal: 'night', spd: 1.2,  dens: 1.35, fishGoal: 75 },
+  { len: 1900, theme: 0, pal: 'night', spd: 1.25, dens: 1.45, fishGoal: 85 },
+  { len: 2200, theme: 1, pal: 'night', spd: 1.3,  dens: 1.5,  fishGoal: 100 },
+  { len: 2400, theme: 0, pal: 'dusk',  spd: 1.32, dens: 1.5,  fishGoal: 108 },
+  { len: 2600, theme: 1, pal: 'dusk',  spd: 1.34, dens: 1.52, fishGoal: 115 },
+  { len: 2800, theme: 0, pal: 'night', spd: 1.36, dens: 1.54, fishGoal: 122 },
+  { len: 3000, theme: 1, pal: 'day',   spd: 1.38, dens: 1.56, fishGoal: 130 },
+  { len: 3200, theme: 0, pal: 'dusk',  spd: 1.4,  dens: 1.58, fishGoal: 138 },
+  { len: 3400, theme: 1, pal: 'night', spd: 1.42, dens: 1.6,  fishGoal: 145 },
+  { len: 3600, theme: 0, pal: 'dusk',  spd: 1.44, dens: 1.6,  fishGoal: 152 },
+  { len: 3900, theme: 1, pal: 'night', spd: 1.46, dens: 1.62, fishGoal: 162 },
+  { len: 4200, theme: 0, pal: 'dusk',  spd: 1.48, dens: 1.64, fishGoal: 172 },
+  { len: 4500, theme: 1, pal: 'night', spd: 1.5,  dens: 1.66, fishGoal: 185 },
 ];
 const TASK_POOL = [
   { id: 'dist400', name: '單局滑行 400m', target: 400, stat: 'maxDist' },
@@ -899,6 +1063,12 @@ function applySkins() {
   const sl = SLED_SKINS.find(s => s.id === S.skins.eqSled) || SLED_SKINS[0];
   pengBodyMat.color.setHex(p.body);
   pengBellyMat.color.setHex(p.belly);
+  pengBodyMat.transparent = pengBellyMat.transparent = false;
+  pengBodyMat.opacity = pengBellyMat.opacity = 1;
+  scarfMat.color.setHex(p.scarf ?? 0xd84848);
+  hatBand.visible = p.hat === 'band';
+  hatBeanie.visible = p.hat === 'beanie';
+  hatCrown.visible = p.hat === 'crown';
   sledMatA.color.setHex(sl.c1);
   sledMatB.color.setHex(sl.c2);
 }
@@ -918,6 +1088,7 @@ let targetX = 0, pointerActive = false;
 let spawnAt = 30, decorAt = 10, flagAt = 120, fishAt = 40, itemAt = 160;
 let fishCount = 0, shieldOn = false, magnetT = 0, boostT = 0, invulnT = 0;
 let dashT = 0, starT = 0, bulletT = 0, lightningT = 0, starWas = false;
+let slowT = 0, ghostT = 0, x2T = 0, ghostWas = false, speedFast = false;
 let crashT = 0;
 let penguinFly = null;
 let speedTier = 0;
@@ -944,7 +1115,10 @@ function place(g, x, z) {
     let r = g.userData.r || 1;
     const ramp = !!g.userData.ramp;
     if (lightningT > 0 && !ramp) { g.scale.multiplyScalar(.4); r *= .4; }  // 閃電期間新障礙也縮小
-    obstacles.push({ g, r, ramp });
+    const entry = { g, r, ramp };
+    if (g.userData.mover)  // 雪人：左右滑動參數
+      entry.mv = { base: x, amp: 2.5 + Math.random() * 3, spd: .5 + Math.random() * .7, ph: Math.random() * 6 };
+    obstacles.push(entry);
   }
 }
 function placeItem(g, x, z, type, arcY) {
@@ -968,7 +1142,9 @@ function spawnStep() {
     const x = (Math.random() * 2 - 1) * (TRACK_HALF - 1);
     const roll = Math.random();
     let g;
+    const moverOk = mode === 'level' ? curLv >= 6 : dist > 800;  // 第 7 關／800m 起出現雪人
     if (roll < (RAMP_BOOST ? .6 : .13)) g = makeRamp();
+    else if (moverOk && roll < .26) g = makeSnowman();
     else if (aheadTheme === 0) g = roll < .6 ? makeSnowTree() : makeRock();
     else g = roll < .45 ? makeCrate() : roll < .7 ? makePole() : roll < .85 ? makeKiosk() : makeSnowTree();
     place(g, x, SPAWN_Z);
@@ -1015,7 +1191,8 @@ function spawnStep() {
 }
 // 驚喜箱獎池（權重）：稀有度仿瑪利歐賽車，星星/子彈最稀有
 const BOX_POOL = [
-  ['shield', 18], ['magnet', 18], ['boost', 14], ['mush', 16], ['bolt', 12], ['star', 12], ['bullet', 10],
+  ['shield', 14], ['magnet', 14], ['boost', 11], ['mush', 12], ['bolt', 9], ['star', 9], ['bullet', 8],
+  ['slow', 6], ['ghost', 7], ['rain', 5], ['x2', 5],
 ];
 function rollBox() {
   let t = Math.random() * BOX_POOL.reduce((a, [, w]) => a + w, 0);
@@ -1047,6 +1224,22 @@ function applyPower(type) {
     for (const ob of obstacles)  // 全場障礙縮小、可直接輾過
       if (!ob.ramp && ob.g.scale.x > .5) { ob.g.scale.multiplyScalar(.4); ob.r *= .4; }
     showToast('⚡ 閃電！'); AudioSys.blip(180, .5, .2, 'square');
+  } else if (type === 'slow') {
+    slowT = 5;
+    showToast('⏳ 緩速！'); AudioSys.blip(400, .35, .12, 'sine');
+  } else if (type === 'ghost') {
+    ghostT = 5;
+    showToast('👻 幽靈穿透！'); AudioSys.blip(500, .4, .1, 'sine');
+  } else if (type === 'x2') {
+    x2T = 10;
+    showToast('✨ 小魚雙倍！'); AudioSys.blip(880, .3, .12, 'triangle');
+  } else if (type === 'rain') {
+    for (let w = 0; w < 4; w++) {  // 前方灑 4 波共 20 條魚
+      const fx = (Math.random() * 2 - 1) * (TRACK_HALF - 2);
+      for (let i = 0; i < 5; i++)
+        placeItem(makeFishItem(), fx + (Math.random() - .5) * 1.5, -50 - w * 24 - i * 2.6, 'fish');
+    }
+    showToast('🌧 魚雨！'); AudioSys.blip(820, .35, .12, 'triangle');
   }
 }
 // 開場把整條雪道先鋪滿（障礙＋路旁裝飾），依起始主題選物件組
@@ -1117,6 +1310,7 @@ function prepareRun() {
   fishAt = dist + 40; itemAt = dist + 160;
   fishCount = 0; shieldOn = false; magnetT = 0; boostT = 0; invulnT = 0;
   dashT = 0; starT = 0; bulletT = 0; lightningT = 0; starWas = false;
+  slowT = 0; ghostT = 0; x2T = 0; ghostWas = false;
   applySkins();
   finishSpawned = false; diedThisRun = false;
   runJumps = 0; runSmash = 0; runItems = 0;
@@ -1139,11 +1333,15 @@ function prepareRun() {
       for (let i = 0; i < 5; i++) placeItem(makeFishItem(), 0, -40 - i * 2.4, 'fish');
       placeItem(makeShieldItem(), 0, -70, 'shield');
       placeItem(makeMagnetItem(), 0, -95, 'magnet');
-      placeItem(makeBoltItem(), 0, -115, 'bolt');
-      placeItem(makeItemBox(), 0, -132, 'box');
-      placeItem(makeMushItem(), 0, -150, 'mush');
-      placeItem(makeStarItem(), 0, -170, 'star');
-      placeItem(makeBulletItem(), 0, -190, 'bullet');
+      placeItem(makeGhostItem(), 0, -112, 'ghost');
+      placeItem(makeX2Item(), 0, -130, 'x2');
+      placeItem(makeSlowItem(), 0, -148, 'slow');
+      placeItem(makeRainItem(), 0, -166, 'rain');
+      placeItem(makeMushItem(), 0, -184, 'mush');
+      placeItem(makeBoltItem(), 0, -202, 'bolt');
+      placeItem(makeItemBox(), 0, -220, 'box');
+      placeItem(makeStarItem(), 0, -238, 'star');
+      placeItem(makeBulletItem(), 0, -256, 'bullet');
     }
   }
 }
@@ -1157,7 +1355,7 @@ function startRun(m, lv) {
   if (Math.random() < [0, .3, .6, 1][S.up.shield]) { shieldOn = true; shieldBubble.visible = true; }
   const hs = [0, 2, 3, 4][S.up.head];
   if (hs) { boostT = hs; showToast('🎿 起步衝刺！'); }
-  applyNight(m === 'level' && lvConf.night);
+  applyPalette(m === 'level' ? lvConf.pal : 'day');
   AudioSys.init();
   if (AudioSys.ctx && AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume();
   ['menu', 'lvSelect', 'shop', 'clearScreen', 'signinBox', 'reviveBox', 'pauseBox'].forEach(hide);
@@ -1204,7 +1402,7 @@ addEventListener('keydown', e => {
 function showMenu() {
   state = 'menu';
   mode = 'endless'; lvConf = null;
-  applyNight(false);
+  applyPalette('day');
   $('hud').style.opacity = 0;
   $('pauseBtn').style.display = 'none';
   $('overScreen').classList.remove('show');
@@ -1438,7 +1636,7 @@ function renderLevels() {
     const st = S.stars[i] || 0;
     return `<button class="lvNode ${locked ? 'lock' : ''}" data-lv="${i}" ${locked ? 'disabled' : ''}>
       <div class="n">${locked ? '🔒' : i + 1}</div>
-      <div class="len">${lv.len}m${lv.night ? '・夜' : ''}${lv.theme === 1 ? '・城' : '・山'}</div>
+      <div class="len">${lv.len}m${lv.pal === 'night' ? '・夜' : lv.pal === 'dusk' ? '・昏' : ''}${lv.theme === 1 ? '・城' : '・山'}</div>
       <div class="st">${'★'.repeat(st)}${'☆'.repeat(3 - st)}</div></button>`;
   }).join('');
 }
@@ -1536,11 +1734,15 @@ function tick(now) {
       starT = Math.max(0, starT - dt);
       bulletT = Math.max(0, bulletT - dt);
       lightningT = Math.max(0, lightningT - dt);
+      slowT = Math.max(0, slowT - dt);
+      ghostT = Math.max(0, ghostT - dt);
+      x2T = Math.max(0, x2T - dt);
       // 底速漸進 16→40，下坡再加速、上坡減速；道具加成擇強生效
       const baseSpd = Math.min(40, 16 + dist * .03) * (mode === 'level' ? lvConf.spd : 1);
       const boostMul = dashT > 0 ? 1.9 : bulletT > 0 ? 1.8 : starT > 0 ? 1.5 : boostT > 0 ? 1.35 : 1;
       const capSpd = (dashT > 0 || bulletT > 0 || starT > 0) ? 60 : 52;
-      const targetSpd = THREE.MathUtils.clamp(baseSpd * (1 - terrainSlope(dist) * 2.4) * boostMul, 13, capSpd);
+      let targetSpd = THREE.MathUtils.clamp(baseSpd * (1 - terrainSlope(dist) * 2.4) * boostMul, 13, capSpd);
+      if (slowT > 0) targetSpd *= .55;
       speed += (targetSpd - speed) * Math.min(dt * 1.8, 1);
       dist += speed * dt;
       $('dist').textContent = mode === 'level'
@@ -1610,7 +1812,7 @@ function tick(now) {
             disposeObj(it.g);
             items.splice(i, 1);
             if (it.type === 'fish') {
-              fishCount++;
+              fishCount += x2T > 0 ? 2 : 1;  // ✨ 雙倍期間一條算兩條
               $('fishHud').textContent = '🐟 ' + fishCount;
               AudioSys.blip(880 + (fishCount % 5) * 60, .12, .08, 'triangle');
               spawnPuff(ox, it.g.position.y, oz, 0, 2, 1, .45);
@@ -1630,6 +1832,9 @@ function tick(now) {
         starT > 0 ? '⭐' + Math.ceil(starT) : null,
         bulletT > 0 ? '🎈' + Math.ceil(bulletT) : null,
         lightningT > 0 ? '⚡' + Math.ceil(lightningT) : null,
+        ghostT > 0 ? '👻' + Math.ceil(ghostT) : null,
+        slowT > 0 ? '⏳' + Math.ceil(slowT) : null,
+        x2T > 0 ? '✨' + Math.ceil(x2T) : null,
       ].filter(Boolean).join('　');
 
       spawnStep();
@@ -1678,6 +1883,10 @@ function tick(now) {
       it.g.position.y = it.baseY + Math.sin(now * .004 + it.phase) * .16;
       it.g.rotation.y += dt * 2.6;
     }
+    // 雪人左右滑動
+    for (const ob of obstacles) if (ob.mv)
+      ob.g.position.x = THREE.MathUtils.clamp(
+        ob.mv.base + Math.sin(now * .001 * ob.mv.spd + ob.mv.ph) * ob.mv.amp, -TRACK_HALF, TRACK_HALF);
     for (const p of trailPts) p.z += speed * dt;
     while (trailPts.length && trailPts[0].z > KILL_Z) trailPts.shift();
     rebuildTrail();
@@ -1696,7 +1905,7 @@ function tick(now) {
         if (oz > -1.4 && oz < 1.4 && Math.abs(px - ox) < ob.r + .62) {
           if (ob.ramp) {
             if (grounded) { grounded = false; pvy = 8.5 + speed * .12; runJumps++; AudioSys.jump(); }
-          } else if (py < 1.1 && invulnT <= 0) {
+          } else if (py < 1.1 && invulnT <= 0 && ghostT <= 0) {  // 幽靈期間直接穿過
             if (boostT > 0 || dashT > 0 || starT > 0 || bulletT > 0 || lightningT > 0) toSmash.push(ob);
             else if (shieldOn) {
               shieldOn = false; shieldBubble.visible = false; invulnT = 1;
@@ -1734,6 +1943,26 @@ function tick(now) {
     pengBodyMat.color.setHSL((now * .0015) % 1, .85, .55);
     starWas = true;
   } else if (starWas) { starWas = false; applySkins(); }
+  // 幽靈：半透明
+  if (ghostT > 0) {
+    pengBodyMat.transparent = pengBellyMat.transparent = true;
+    pengBodyMat.opacity = pengBellyMat.opacity = .45;
+    ghostWas = true;
+  } else if (ghostWas) { ghostWas = false; applySkins(); }
+  // 高速殘影線
+  const fastNow = state === 'run' && speed > 40;
+  if (fastNow !== speedFast) {
+    speedFast = fastNow;
+    $('slL').classList.toggle('on', fastNow);
+    $('slR').classList.toggle('on', fastNow);
+  }
+  // 雲飄移＋極光搖曳
+  for (const cl of clouds) {
+    cl.position.x += dt * .8;
+    if (cl.position.x > 115) cl.position.x = -115;
+  }
+  if (auroraGroup.visible)
+    auroraGroup.children.forEach((m, i) => m.rotation.z = (i - 1) * .12 + Math.sin(now * .0004 + i * 2) * .06);
 
   // 玩家姿態（貼合坡面、上下坡俯仰）
   const gy = terrainH(dist);
